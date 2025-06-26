@@ -1,5 +1,5 @@
 ---
-title: "Writing a great story for data science projects - Summer 2025"
+title: "Capstone project on LTSM"
 subtitle: "This is a Report Template Quarto"
 author: "Lionel & Killian (Advisor: Dr. Cohen)"
 date: '`r Sys.Date()`'
