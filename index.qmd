@@ -34,33 +34,12 @@ writing!
 
 ## Introduction
 
-The introduction should:
+With ever-growing complexity and interconnectedness in modern digital infrastructures, the attack surface has expanded appreciably, posing serious threats for organizations and individuals. Cybersecurity breaches, specifically advanced process-level intrusions aimed at crucial systems, have increased in quantity and complexity. Traditional rule-based detection tools and static feature engineering solutions are often ineffective for finding new threats exploiting temporal patterns or masquerading as benign activity. To meet this state, there is a need for the construction of resilient, dynamic, and data-driven models able to learn system activity in the real world to effectively identify anomalies.
+In sequence modeling machine learning techniques, the Long Short-Term Memory (LSTM) networks have been important for the learning of long-range temporal relationships in sequential data such as speech (Graves et al., 2013), language (Sundermeyer et al., 2012), and biomedical signals (Lipton et al., 2016). Initially introduced by Hochreiter and Schmidhuber (1997), the LSTM networks enhance the traditional recurrent neural network (RNN) architecture through the addition of memory cells and gate mechanisms for the storage and selective forgetfulness of long-range time-series relationships. For these reasons, the use of LSTM is a natural choice in the representation of the behavior of the host in cybersecurity systems where the order of the execution of processes, the timing, and the context in which they are executed are of crucial semantic information.
+Despite the promise of deep learning for the application of anomaly detection, most of the cybersecurity work relies on outdated or synthetic datasets such as the KDD Cup 1999 (Hettich & Bay, 1999), NSL-KDD (Tavallaee et al., 2009), and the ISCX IDS 2012 (Shiravi et al., 2012). Such datasets are lacking in the sort of diversity, realism, and granularity required to validate models within modern operating conditions. For instance, the BPF-extended tracking honeypot (BETH) dataset (Highnam et al., 2021) is a quantum leap in the field. It consists of well over eight million process-level events, meticulously labelled and gathered through extended Berkeley Packet Filter (eBPF) instrumentation on live cloud-hosted honeypots. It is important to note that the dataset consists of benign and adversarial host activity in natural operating conditions along with comprehensive temporal details and proper labels.
+In our paper, we discuss the use of LSTM networks to characterize benign system activity and discern process-level anomalies through the usage of the BETH dataset. Unlike the common supervised learning scenario in which there are annotated examples of all attack modes, we embrace the semi-supervised method to detecting anomalies: the LSTM model is trained only on benign activity in order to reveal the hidden structure and temporal dynamics of typical host behavior. Under test, deviations of the acquired pattern are signaled as potential anomalies. Our contributions are the following:
+We propose a sequence-based LSTM model trained on real-world benign process logs for anomaly detection. We benchmark the model on a modern, cloud-native dataset (BETH) containing labeled attack sequences. We evaluate the model using both classification metrics (e.g., precision, recall) and temporal anomaly scoring, comparing its performance to traditional baselines. This study contributes to the growing body of literature on robust machine learning for cybersecurity and demonstrates the applicability of temporal deep learning models in detecting nuanced and context-dependent threats in dynamic environments.
 
--   Develop a storyline that captures attention and maintains interest.
-
--   Your audience is your peers
-
--   Clearly state the problem or question you're addressing.
-
-<!-- -->
-
--   Introduce why it is relevant needs.
-
--   Provide an overview of your approach.
-
-Example of writing including citing references:
-
-*This is an introduction to ..... regression, which is a non-parametric
-estimator that estimates the conditional expectation of two variables
-which is random. The goal of a kernel regression is to discover the
-non-linear relationship between two random variables. To discover the
-non-linear relationship, kernel estimator or kernel smoothing is the
-main method to estimate the curve for non-parametric statistics. In
-kernel estimator, weight function is known as kernel function
-[@efr2008]. Cite this paper [@bro2014principal]. The GEE [@wang2014].
-The PCA [@daffertshofer2004pca]*. Topology can be used in machine learning [@adams2021topology]
-
-*This is my work and I want to add more work...*
 
 ## Methods
 
