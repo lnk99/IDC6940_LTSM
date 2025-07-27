@@ -115,7 +115,29 @@ Cybersecurity anomaly detection requires models that are flexible, context-aware
 
 Unsupervised learning, particularly autoencoder-based methods, allows us to model what “normal” looks like and detect deviations from it, without requiring labeled attacks. This approach is grounded in the notion that abnormal behavior is, by definition, rare and structurally distinct from routine system activity [@yin2017deep].
 
-The BETH dataset [@highnam2021beth] was selected to evaluate our approach. It includes over 8 million system log events collected from 23 honeypots designed to mimic real-world server environments. Each honeypot was exposed to the internet and captured one targeted attack (at most), alongside a large volume of benign activity. Events are labeled using two binary fields: Sus for suspicious activity and Evil for confirmed malicious events.
+The BETH dataset [@highnam2021beth] was selected to evaluate our approach. It includes over 8 million system log events collected from 23 honeypots designed to mimic real-world server environments. Each honeypot was exposed to the internet and captured one targeted attack (at most), alongside a large volume of benign activity. Events are labeled using two binary fields: Sus for suspicious activity and Evil for confirmed malicious events. the table below give a description of our all dataset. 
+
+Table1: The description and type of each feature within the DNS logs  
+
+| **Feature**         | **Description**                                             |
+|---------------------|-------------------------------------------------------------|
+| `timestamp`         | Date and time When the event occurred (float)               |
+| `processId`         | ID of the process generating the event                      |
+| `threadId`          | ID of the thread performing the operation                   |
+| `parentProcessId`   | ID of the parent process                                    |
+| `userId`            | User running the process/event                              |
+| `mountNamespace`    | Kernel namespace for filesystem isolation                   |
+| `processName`       | Name of the executable or program                           |
+| `hostName`          | Name or IP of the machine                                   |
+| `eventId`           | Numeric identifier for the event                            |
+| `eventName`         | Name/type of system call/event                              |
+| `stackAddresses`    | List of memory addresses (call stack)                       |
+| `argsNum`           | Number of arguments for the event                           |
+| `returnValue`       | Return value of the system call/event                       |
+| `args`              | List of arguments (name, type, value)                       |
+| `sus`               | 1 if flagged suspicious, 0 otherwise                        |
+| `evil`              | 1 if event is malicious, 0 otherwise                        |
+
 
 **The BETH dataset offers several key advantages:**  
 - **Realism:** Data is collected in production-like environments with realistic attack vectors.  
@@ -252,6 +274,7 @@ To convert reconstruction error into binary predictions, we used the precision-r
 Once the best threshold was determined, we applied it to the test set. The model successfully identified anomalous sequences with high accuracy of 99%. The confusion matrix below shows that most benign and malicious events are correctly classified.  
 
 ![Figure 10: Confusion matrix for final predictions](9.png){fig-align="center" width=320px}
+
 - False Positive Rate: 0.040
 - False Negative Rate: 0.005
 
