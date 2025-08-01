@@ -149,7 +149,6 @@ Compared to older datasets like KDD’99 [@tavallaee2009detailed; @hettich1999uc
 ### 5. Data Preprocessing and Sequence Modeling
 
 ```{r}
-
 library(googledrive)
 library(tidyverse)
 library(lubridate)
@@ -158,10 +157,6 @@ library(recipes)
 library(yardstick)
 library(rsample)
 library(data.table)
-
-# Install once if needed:
-install.packages("googledrive")
-install.packages("readr")
 
 library(googledrive)
 library(readr)
