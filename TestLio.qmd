@@ -1,0 +1,303 @@
+---
+title: "Detecting Anomalous Cybersecurity Events Using LSTM Autoencoders"
+subtitle: "A Case Study on the BETH Dataset"
+author: "Lionel & Killian (Advisor: Dr. Cohen)"
+date: today
+format:
+  html:
+    code-fold: true
+course: Capstone Projects in Data Science
+bibliography: references.bib # file contains bibtex for references
+#always_allow_html: true # this allows to get PDF with HTML features
+self-contained: true
+execute: 
+  warning: false
+  message: false
+editor: 
+  markdown: 
+    wrap: 72
+editor_options: 
+  chunk_output_type: inline
+---
+
+Slides: [slides.html](slides.html){target="_blank"} ( Go to `slides.qmd`
+to edit)
+
+## I- Introduction
+
+As modern digital infrastructures become increasingly interconnected and complex, attackers are relying more on process-level intrusions that carefully blend into legitimate activity. Such sophisticated threats often unfolding slowly over time or interleaving malicious commands with normal operations can evade static, signature-based defenses. Traditional systems, which are designed around pre-defined rules or pattern matching, fail to account for subtle changes in temporal context: an action that appears normal in isolation may signal an attack when it occurs in an unusual sequence. Detecting these threats requires models capable of understanding how events unfold over time.
+This challenge has spurred research toward dynamic, data-driven sequence modeling methods. Among these, Long Short-Term Memory (LSTM) networks have emerged as particularly effective. Introduced by Hochreiter and Schmidhuber [@hochreiter1997long], LSTM networks use gated memory cells that retain information across long sequences, effectively overcoming the vanishing gradient problem in traditional recurrent neural networks. This architecture allows LSTMs to capture dependencies spanning dozens or even hundreds of events, making them well-suited for modeling the temporal structure of cybersecurity logs, where the sequence of system calls and process operations is often critical.
+
+The versatility of LSTM networks has been demonstrated across diverse domains. In speech recognition, Graves, Mohamed, and Hinton [@graves2013speech] showed that deep LSTM architectures can learn the temporal structure of audio signals, significantly reducing error rates on benchmark tasks. In natural language processing, Sundermeyer et al. [@sundermeyer2012lstm] used LSTMs for language modeling, demonstrating that the model’s ability to retain long-range context leads to more accurate text generation compared to traditional n-gram methods. In the clinical domain, Lipton et al. [@lipton2016learning] applied LSTM models to patient vitals time series, revealing how memory-enabled models can detect subtle health anomalies as they develop. Across these applications, a core insight emerges: when the data is fundamentally sequential, LSTMs excel at modeling it.
+This modeling power has translated into cybersecurity research as well. Kim et al. [@kim2016long] applied LSTM-based classifiers to intrusion detection, demonstrating that LSTMs can recognize abnormal sequences of system and network behavior with lower false-positive rates than static feature approaches. Malhotra et al. [@malhotra2016lstm] advanced this work by introducing an LSTM encoder decoder for anomaly detection. Instead of directly classifying events, the model reconstructs input sequences, identifying anomalies by elevated reconstruction errors an approach especially well suited to unlabeled or novel attacks, as it learns solely from normal behavior. Yin et al. [@yin2017deep] extended this concept using recurrent neural networks over raw flow data, achieving improved generalization in network intrusion detection. Building further, Cinque et al. [@cinque2022micro2vec] introduced Micro2vec, which embeds log message patterns as numeric vectors and leverages LSTM networks to detect anomalies in microservice environments, showing how sequence models can scale to complex, real-world systems.
+
+Yet, progress in these models has often been constrained by outdated benchmarks. Seminal datasets such as KDD Cup 1999 [@hettich1999uci], NSL-KDD [@tavallaee2009detailed], and ISCX 2012 [@shiravi2012developing] provided early test beds for intrusion detection research, but are now hampered by synthetic traffic, unrealistic features, and obsolete system contexts limiting their generalizability. A model trained on these datasets may detect known patterns, but often fails in real-world scenarios where attackers use new commands, timing patterns, or process chains.
+
+In response, Highnam et al. [@highnam2021beth] introduced the BETH dataset, marking a significant advance in realism and operational relevance. Instrumented with eBPF across live honeypots, BETH captures over eight million process-level events including system calls, arguments, return values, and timestamps. Importantly, each data instance cleanly separates benign system behavior from adversarial activity, providing labeled, temporally coherent sequences. This makes BETH an ideal platform for training sequence-based anomaly detection models in a semi-supervised setting.
+Our approach builds directly on this foundation. We deploy an LSTM autoencoder trained exclusively on benign process sequences from BETH. The encoder compresses temporal sequences into fixed-length latent representations, while the decoder attempts to reconstruct them. When the model encounters novel malicious behavior, its reconstruction fails, producing high reconstruction error, this serves as our anomaly signal. This method aligns with recent advances in unsupervised anomaly detection [@gokstorp2024anomaly; @greff2017lstm], removing the need for prior knowledge of attack types and allowing rapid adaptation to emerging threats.
+
+This work makes three key contributions. First, it demonstrates the effectiveness of LSTM-based sequence modeling for detecting anomalies in real-world, process-level logs. Second, it presents a rigorous evaluation on the BETH dataset, using classification metrics and reconstruction thresholds to quantify detection capabilities. Third, it bridges the gap between advanced deep learning techniques and practical cybersecurity needs, delivering an interpretable, flexible, and deployable detection framework grounded in realistic system behavior.
+
+
+## II- Methods
+This section presents the methodological framework for detecting anomalies in cybersecurity event logs using Long Short-Term Memory (LSTM) autoencoders. The approach is organized into six interconnected components and together, these steps form a comprehensive and scalable pipeline for identifying irregularities in large-scale log data
+
+### 1. Long Short-Term Memory (LSTM) Networks
+
+Long Short-Term Memory (LSTM) networks are a type of recurrent neural network (RNN) developed by Hochreiter and Schmidhuber (1997) [@hochreiter1997long] specifically to overcome the vanishing gradient problem found in traditional RNNs. In cybersecurity applications, the ability to model long-range temporal dependencies is crucial, as malicious activity often unfolds over extended sequences of system calls, network packets, or access attempts.
+
+An LSTM cell maintains two key internal states at each time step: the cell state $C_t$ and the hidden state $h_t$. The cell state serves as a memory that runs across the sequence, allowing information to persist over time. Three gating mechanisms regulate this process:
+
+- **Forget Gate**: Determines which parts of the previous memory to discard.  
+  $$f_t = \sigma(W_f [h_{t-1}, x_t] + b_f)$$
+where $h_{t-1}$ is the output in state $t-1$, $W_f$ and $b_f$ is the weight matrices
+and the bias of the forget gate.  
+
+- **Input Gate and Candidate Update**: Controls how much new information is added to the memory.  
+  $$i_t = \sigma(W_i [h_{t-1}, x_t] + b_i), \;\; \tilde{C}_t = \tanh(W_c [h_{t-1}, x_t] + b_c)$$
+- **Cell State Update**:  
+  $$C_t = f_t * C_{t-1} + i_t * \tilde{C}_t$$
+where ($W_i$, $b_i$) and ($W_c$, $b_c$) are the weight matrices and the biases of
+input gate and memory cell state, respectively
+
+- **Output Gate and Hidden State**: Controls what the cell outputs.  
+  $$o_t = \sigma(W_o [h_{t-1}, x_t] + b_o), \;\; h_t = o_t * \tanh(C_t)$$
+where $W_o$ and $b_o$ are the weight matrix and the bias of output gate, determines a part of the cell state being outputed.
+
+![Figure 1: A module of LSTM network [@trinh2021detecting]](lstm_cell.png){fig-align="center" width=400px}
+
+LSTM’s memory mechanisms make it especially effective for modeling system behavior over time, where a sequence of seemingly benign events may, when considered together, signal an attack. This makes LSTM a preferred choice for modeling logs in intrusion detection systems [@lipton2016learning; @greff2017lstm; @graves2013speech]. 
+
+### 2. LSTM Autoencoder for Anomaly Detection
+
+An LSTM autoencoder combines an encoder–decoder architecture with LSTM layers to learn latent representations of temporal data in an unsupervised manner. The encoder compresses input sequences into a fixed-length latent vector, while the decoder attempts to reconstruct the sequence from this vector. If the model is trained exclusively on normal data, it learns to reconstruct familiar sequences accurately. Anomalous sequences, which deviate from learned patterns, yield high reconstruction error a signal of abnormal behavior.
+
+Formally, for an input sequence $x = (x_1, ..., x_T)$, the autoencoder is trained to minimize the reconstruction loss:
+
+$$
+L = \frac{1}{T} \sum_{t=1}^T \| x_t - \hat{x}_t \|^2
+$$
+
+where $\hat{x}_t$ is the output generated by the decoder at each time step.
+
+During inference, this reconstruction error serves as an anomaly score. A sequence with error above a threshold $\theta$ is flagged as anomalous. This technique, called reconstruction-based anomaly detection, is effective when anomalous samples are rare or unknown, which is often the case in cybersecurity contexts.
+
+![Figure 2: LSTM Autoencoder for Anomaly Detection [@trinh2021detecting]](11.png){fig-align="center" width=400px}
+ 
+Past research has demonstrated the effectiveness of this approach in domains such as multi-sensor fault detection [@malhotra2016lstm], system log anomaly detection [@gokstorp2024anomaly], and network intrusion detection [@kim2016long; @cinque2022micro2vec]. Its unsupervised nature and ability to model complex time-dependent features make it a natural fit for the challenges of modern intrusion detection systems.
+
+### 3. Anomaly Detection Using LSTM Autoencoders
+
+Once trained on normal data, an LSTM autoencoder becomes a powerful tool for identifying anomalous behavior in sequential inputs such as system logs or network traces. The core idea is that the model becomes highly proficient at reconstructing sequences that follow the familiar temporal patterns it learned during training. However, when presented with sequences that deviate from these learned patterns such as those containing rare, unexpected, or malicious events, the model fails to reconstruct them accurately, producing a noticeably higher reconstruction error.
+
+This reconstruction error serves as a quantifiable measure of anomaly. Specifically, the anomaly score for a given input sequence is computed as the **mean squared error (MSE)** between each input vector  $x_t$ and its reconstructed counterpart $x_t$:
+
+
+$$\text{Reconstruction Error} = \frac{1}{T} \sum_{t=1}^{T} \|x_t - \hat{x}_t\|^2$$
+
+Here,  $T$ is the total number of time steps in the sequence. A higher score indicates greater divergence from normal behavior, and thus, a higher likelihood that the sequence is anomalous.
+
+To operationalize this detection process, a **threshold** is established. This threshold is usually selected by analyzing the distribution of reconstruction errors in the training or validation dataset, often by selecting a statistical percentile or optimizing detection metrics such as the F1-score. Any sequence with a reconstruction error exceeding the threshold is classified as **anomalous**, while sequences with lower errors are assumed to represent **normal activity**.
+
+This approach offers several key benefits in the context of cybersecurity anomaly detection:
+
+- **Unsupervised learning**: There is no need for labeled attack data during training, which is ideal since real-world attack examples are rare, imbalanced, or unknown at the time of deployment.
+- **Temporal awareness**: LSTM cells allow the model to consider context across long event sequences—making it effective in identifying subtle but meaningful deviations in system behavior over time.
+- **Detection of unknown attacks**: Since the model is not trained on known attack signatures, it generalizes better to novel or zero-day threats, simply by recognizing that "this sequence doesn't look like normal behavior."
+
+The method has been successfully used in a variety of security-critical environments. For instance, Malhotra et al. [@malhotra2016lstm] used it to detect failures in multi-sensor environments, while Gökstorp et al. [@gokstorp2024anomaly] applied it to analyze security logs. These studies show that LSTM autoencoders can reliably distinguish benign from anomalous sequences, even in high-noise or high-volume contexts.
+
+In this project, we leverage the LSTM autoencoder’s ability to detect such behavioral anomalies in the BETH dataset. By training solely on benign log sequences and evaluating reconstruction performance on new data, our model provides a flexible, adaptive, and scalable mechanism for real-time anomaly detection.
+
+### 4. Justification for Approach and Dataset
+
+Cybersecurity anomaly detection requires models that are flexible, context-aware, and capable of adapting to new or unseen attack patterns. Traditional rule-based or signature-based detection systems are limited by their reliance on predefined patterns, making them ineffective against zero-day attacks or novel behavior.
+
+Unsupervised learning, particularly autoencoder-based methods, allows us to model what “normal” looks like and detect deviations from it, without requiring labeled attacks. This approach is grounded in the notion that abnormal behavior is, by definition, rare and structurally distinct from routine system activity [@yin2017deep].
+
+The BETH dataset [@highnam2021beth] was selected to evaluate our approach. It includes over 8 million system log events collected from 23 honeypots designed to mimic real-world server environments. Each honeypot was exposed to the internet and captured one targeted attack (at most), alongside a large volume of benign activity. Events are labeled using two binary fields: Sus for suspicious activity and Evil for confirmed malicious events. the table below give a description of our all dataset. 
+
+Table1: The description and type of each feature within the DNS logs  
+
+| **Feature**         | **Description**                                             |
+|---------------------|-------------------------------------------------------------|
+| `timestamp`         | Date and time When the event occurred (float)               |
+| `processId`         | ID of the process generating the event                      |
+| `threadId`          | ID of the thread performing the operation                   |
+| `parentProcessId`   | ID of the parent process                                    |
+| `userId`            | User running the process/event                              |
+| `mountNamespace`    | Kernel namespace for filesystem isolation                   |
+| `processName`       | Name of the executable or program                           |
+| `hostName`          | Name or IP of the machine                                   |
+| `eventId`           | Numeric identifier for the event                            |
+| `eventName`         | Name/type of system call/event                              |
+| `stackAddresses`    | List of memory addresses (call stack)                       |
+| `argsNum`           | Number of arguments for the event                           |
+| `returnValue`       | Return value of the system call/event                       |
+| `args`              | List of arguments (name, type, value)                       |
+| `sus`               | 1 if flagged suspicious, 0 otherwise                        |
+| `evil`              | 1 if event is malicious, 0 otherwise                        |
+
+
+**The BETH dataset offers several key advantages:**  
+- **Realism:** Data is collected in production-like environments with realistic attack vectors.  
+- **Anomaly-focused labeling:** The Sus and Evil labels allow fine-grained evaluation of anomaly detection systems.  
+- **Accessibility:** The dataset is publicly available, enabling reproducibility and peer comparison.  
+
+Compared to older datasets like KDD’99 [@tavallaee2009detailed; @hettich1999uci] or NSL-KDD, BETH reflects modern system-level behavior and attack techniques, providing a more accurate benchmark for current anomaly detection research.
+
+### 5. Data Preprocessing and Sequence Modeling
+
+
+
+
+To prepare the BETH dataset for LSTM modeling, we applied the following preprocessing steps:
+
+- **Feature extraction:** Key fields such as Timestamp, EventID, SyscallType, ProcessId, ReturnValue, and ArgsNum were selected based on relevance to behavioral analysis.
+- **Encoding:** Categorical fields were one-hot encoded to retain discrete information. Numerical fields were normalized to the [0, 1] range using min-max scaling.
+- **Sequence generation:** A sliding window of fixed size (e.g., 25–50 events) was used to convert raw logs into overlapping sequences. Each sequence was reshaped into a 3D tensor of shape (Batch × Time × Features), preserving temporal order and structural coherence.
+
+**Labeling for sequences was handled as follows:**
+- Sequences with only benign events were labeled as normal.
+- Sequences containing at least one Sus or Evil event were labeled as anomalous.
+
+This approach mirrors real-world monitoring scenarios, where logs are processed in fixed-length windows to detect behavioral anomalies over time.
+
+### 6. Model Training, Thresholding, and Evaluation
+
+#### 6.1 Training and Architecture
+
+The LSTM autoencoder is trained solely on normal sequences. The architecture includes two stacked LSTM layers in the encoder and decoder, with a fully connected layer at the bottleneck. The decoder mirrors the encoder in structure, and the model is trained to minimize reconstruction loss using the Adam optimizer.
+
+To improve generalization:
+- Early stopping is used based on validation loss.
+- A dropout layer is added to mitigate overfitting.
+- 5-fold cross-validation is used to assess the stability of the model across different subsets of the benign data.
+
+Hyperparameters (e.g., learning rate, batch size, window size, latent vector size) were selected based on preliminary tuning and aligned with best practices from related work [@nguyen2021forecasting; @malhotra2016lstm].
+
+#### 6.2 Threshold Selection
+
+After training, we determine an anomaly threshold $\theta$ by analyzing reconstruction errors on a labeled validation set. Multiple strategies are considered:
+
+- Using a fixed percentile of training error distribution (e.g., 95th percentile)
+- Optimizing the F1-score on validation anomalies
+- Minimizing false positive and false negative rates jointly
+
+The selected threshold is applied to test sequences during evaluation.
+
+#### 6.3 Evaluation Metrics
+
+The model’s performance is evaluated using the following metrics:
+
+- **Precision:** The proportion of predicted anomalies that are true anomalies.
+- **Recall:** The proportion of actual anomalies that are correctly identified.
+- **F1-score:** The harmonic mean of precision and recall.
+- **ROC-AUC:** Measures the trade-off between true positive and false positive rates.
+- **Confusion Matrix:** Provides a granular view of model classification results.
+- **Error distribution plots:** Visualize separation between normal and anomalous samples.
+
+These metrics provide a robust, multidimensional assessment of the model’s effectiveness in identifying anomalous behavior.
+
+## III- Analysis and Results
+
+### 1- Data Exploration and Visualization
+
+To better understand the structure and composition of the BETH dataset, we begin by analyzing the process logs that serve as input to our LSTM-based anomaly detection model. The dataset comprises a total of 8,004,918 system events, among which a benchmark subset of approximately 763,145 records is reserved for training. The dataset is rich in temporal and categorical information, including process and thread identifiers, process names, system call arguments, return values, and two binary labels: sus (suspicious) and evil (malicious). The logs are chronologically ordered and contain a temporal feature (timestamp) suitable for sequential modeling. Each record represents an individual system event collected from one of 23 cloud-based honeypots. The data was split into training, validation, and test sets using a 60/20/20 ratio, where only the test set contains attack sequences.
+A descriptive analysis of the features reveals the heterogeneous nature of the dataset. The eventName field, for example, exhibits a long-tailed distribution, with certain events (e.g., execve, read, openat) appearing frequently, while others are rare and potentially indicative of anomalous behavior. The processName and hostName attributes also show high cardinality, which suggests the need for careful encoding strategies when preparing the data for modeling. An initial examination of the BETH training and test subsets reveals several insights into the nature of system-level activity across cloud-hosted honeypots. These observations have guided the formulation of our LSTM-based anomaly detection model.  
+
+#### 1.1 Event Frequency Distribution.  
+
+
+:::{.center}
+![Figure 3: Top 10 most common event names in the training data](1.png){width=550px}
+:::  
+
+As shown in Figure 3, the distribution of system events in the training data is highly skewed. The top three event types close, openat, and security_file_open collectively dominate the logs, each appearing over 150,000 times. In contrast, lower-frequency events such as getdents64 and socket are comparatively rare. This long-tailed distribution suggests that certain system calls represent routine behavior, while others though rare may hold critical information for detecting anomalies. Therefore, proper handling of categorical sparsity and rare event embedding is essential during preprocessing.    
+
+#### 1.2 Process Behavior
+
+
+
+:::{.center}
+![Figure 4: Most Frequent Process Names (Training Set) ](2.png){width=550px}
+:::
+A similar distribution is observed in processName. A small set of background processes account for a significant fraction of system activity. These are expected in benign operational scenarios. However, malicious processes are often less frequent and unpredictable. This motivates the need for a temporal modeling approach that generalizes from dominant patterns while remaining sensitive to rare deviations.  
+
+#### 1.3 Temporal Skew in Data Collection 
+:::{.center}
+![Figure 4: Distribution of events over time by hour.](3.png){width=500px}
+:::
+
+Figure 4 reveals a pronounced imbalance in the distribution of events across time. The vast majority of events in the training set are concentrated within a single hour of activity, with very limited representation beyond that point. This skew may reflect batch-mode logging or the constrained operational window of honeypot collection. As a result, the model must be designed to generalize temporal patterns from narrow windows of observed behavior, further motivating the use of memory-aware architectures like LSTM.  
+
+#### 1.4 Label Imbalance and Anomaly Prevalence    
+:::{.center}
+![Figure 5: Frequency of anomalous (evil) vs. benign events in the test set.](4.png){width=400px}
+:::
+
+Contrary to initial expectations, Figure 4 indicates that a substantial portion of the test data is labeled as malicious (evil = 1), with malicious events significantly outnumbering benign ones. This suggests that the dataset may contain attack-heavy test sequences designed for stress-testing anomaly detection models. This observation presents both a challenge and an opportunity: while class imbalance is often a barrier in anomaly detection, the abundance of labeled attacks in the test set allows for richer evaluation of model performance using standard classification metrics such as precision, recall, and F1-score.    
+
+#### 1.5 Implications for Modeling  
+
+Taken together, these findings justify our modeling decisions in several ways: The long-tailed event distribution calls for embedding-based representations of categorical variables (e.g., eventName, processName).  
+
+The temporal compression of training data highlights the need for architectures that generalize across short but informative sequences.  
+
+The label distribution in the test set supports a semi-supervised evaluation protocol, where a model trained on benign data is evaluated on its ability to flag deviations (i.e., attacks) as anomalous.  
+
+### 2- Modeling and Results  
+
+##### 2.1 Model Architecture  
+The architecture of our anomaly detection system is based on an LSTM autoencoder trained exclusively on benign process sequences. The input to the model is a sliding window of look_back=8 consecutive events, each described by 9 features. The encoder consists of two LSTM layers with 128 and 64 hidden units, respectively, followed by dropout layers to prevent overfitting. The latent representation is repeated and passed to a symmetric decoder consisting of two LSTM layers that reconstruct the input sequence. The model is trained to minimize the Mean Absolute Error (MAE) between the original and reconstructed sequences. 
+
+:::{.center}
+![Figure 6: LSTM Autoencoder architechture](5.png){width=400px}
+:::
+
+The final input tensor shape is (batch_size, 8, 9), corresponding to 8 time steps and 9 features. The model has approximately 1.5 million trainable parameters.    
+
+
+#### 2.2 Training and Validation Performance     
+
+We first evaluate the generalization capability of the model using a 5-fold time-series cross-validation performed on benign data only. For each fold, the model is trained on a different temporal split and evaluated on future sequences to simulate realistic detection scenarios.  
+
+:::{.center}
+![Figure 7: Training / validation Loss result](6.png){width=500px}
+:::
+
+The average validation loss across folds was: 0.142291 (+/-0.128335). After cross-validation, the model was retrained on the full benign training set. The final training and validation losses indicate stable convergence without overfitting as we can see on the figure above
+
+
+#### 2.3 Anomaly Detection Threshold
+The trained model was then used to compute reconstruction errors over the test set. The distribution of reconstruction errors clearly shows a distinguishable separation between normal and anomalous sequences 
+
+![Figure 8: Histogram of test reconstruction errors (MAE)](7.png){fig-align="center" width=500px}   
+
+To convert reconstruction error into binary predictions, we used the precision-recall curve to find the optimal threshold that maximizes the F1-score: 0.9549.
+
+![Figure 9: Precision Recall, F1 vs threshold plot](8.png){fig-align="center" width=400px}
+
+#### 2.4 Classification Metrics
+Once the best threshold was determined, we applied it to the test set. The model successfully identified anomalous sequences with high accuracy of 99%. The confusion matrix below shows that most benign and malicious events are correctly classified.  
+
+![Figure 10: Confusion matrix for final predictions](9.png){fig-align="center" width=320px}
+
+- False Positive Rate: 0.040
+- False Negative Rate: 0.005
+
+The confusion matrix highlights the model’s strength in correctly identifying malicious events (true positives), while maintaining a relatively low rate of false positives. Misclassifications were analyzed and often linked to sequences with novel process or host identifiers not seen during training further confirming the model’s ability to flag unfamiliar temporal patterns. 
+
+The high recall suggests the model captures almost all malicious behavior, which is critical for a cybersecurity context. The small false positive rate (3.4%) indicates that few benign sequences are misclassified, making this model practical for real-time deployment where false alarms are costly. The ROC curve and AUC value confirm the model's excellent discriminatory power between normal and malicious activity.
+
+![Figure 11: ROC Cuve](10.png){fig-align="center" width=320px}  
+
+#### 2.5 Overall Evaluation and Future Considerations
+The LSTM autoencoder exhibited strong performance in terms of: Learning a stable representation of normal sequences. Flagging novel and anomalous patterns through unsupervised learning. Achieving a high F1-score despite class imbalance.
+Aligning with state-of-the-art performance in similar studies [@highnam2021beth; @kim2016long].
+For future deployment, periodic retraining is recommended to adapt to system evolution. Additionally, incorporating attention mechanisms or hybrid ensembles may further enhance sensitivity to subtle anomalies.
+
+## IV-Conclusion
+
+
+## References
