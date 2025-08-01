@@ -1,7 +1,7 @@
 ---
-title: "Present a great story for data science projects"
-subtitle: "This is a Slide Template"
-author: "Students names (Advisor: Dr. Cohen)"
+title: "Detecting Anomalous Cybersecurity Events Using LSTM Networks"
+subtitle: "A Case Study on the BETH Dataset"
+author: "Lionel & Killian (Advisor: Dr. Cohen)"
 date: '`r Sys.Date()`'
 format:
   revealjs
@@ -17,96 +17,148 @@ editor:
     wrap: 72
 ---
 
-::: callout-important
-**Remember:** Your goal is to make your audience understand and care
-about your findings. By crafting a compelling story, you can effectively
-communicate the value of your data science project.
+- Modern infrastructures face **sophisticated, process-level intrusions** that mimic benign behavior.
+- **Static rule-based detection fails** to capture temporal dependencies.
+- We investigate **LSTM-based anomaly detection** for process logs.
+- **Key idea**: model normal system activity and detect deviations as anomalies.
 
-Carefully read this template since it has instructions and tips to
-writing!
+---
 
-More information about `revealjs`:
-<https://quarto.org/docs/reference/formats/presentations/revealjs.html>
-:::
+## LSTM Motivation {.smaller}
 
-## Introduction  {.smaller}
+- **LSTM networks** (Hochreiter et al. 1997):
+  - Solve vanishing gradient problem with gated memory cells.
+  - Capable of learning **long-range temporal dependencies**.
 
--   Develop a storyline that captures attention and maintains interest.
+- Applications:
+  - **Speech recognition** (Graves et al. 2013).
+  - **Language modeling** (Sundermeyer et al. 2012).
+  - **Clinical anomaly detection** (Lipton et al. 2016).
 
--   Your audience is your peers
+- Why relevant ?
+  - **Cybersecurity logs are sequential** — order and timing matter.
 
--   Clearly state the problem or question you're addressing.
+---
 
--   Introduce why it is relevant needs.
+## Cybersecurity Context 
 
--   Provide an overview of your approach.
+- **Kim et al. 2016**: LSTM classifiers for intrusion detection outperform static baselines.
 
-In kernel estimator, weight function is known as kernel function
-[@efr2008]. Cite this paper [@bro2014principal]. The GEE [@wang2014].
-The PCA [@daffertshofer2004pca]\*
+
+- **Malhotra et al. 2016**: LSTM encoder-decoder reconstructs normal sequences, anomalies detected by high reconstruction error.
+
+
+- **Yin et al. 2017**: RNNs generalize better on raw network flows.
+
+
+- **Cinque et al. 2022**: Micro2vec + LSTM captures log anomalies in microservices.
+
+---
+
+## Data Challenge 
+
+- Old datasets (KDD’99, NSL-KDD, ISCX 2012) are **synthetic and outdated**.
+
+
+- **BETH dataset (Highnam et al. 2021)**:
+  - 8M+ process-level events (eBPF-instrumented honeypots).
+  - Rich features: timestamps, syscalls, labels (benign vs. malicious).
+  - Realistic **temporal and adversarial patterns** for modern systems.
+
+---
+
+## Our Approach 
+
+- **Semi-supervised LSTM Autoencoder**:
+  - Train only on benign sequences (normality modeling).
+  - Use **reconstruction error** to flag anomalies.
+
+- **Goal**: detect process-level attacks in test logs.
+
+---
 
 ## Methods
 
--   Detail the models or algorithms used.
+(Will be added later)
 
--   Justify your choices based on the problem and data.
-
-
+---
 
 ## Data Exploration and Visualization
 
--   Describe your data sources and collection process.
+- **Dataset size**: 8,004,918 system events.
 
--   Present initial findings and insights through visualizations.
+- **Training subset**: ~763,145 benign events (60/20/20 split).
 
--   Highlight unexpected patterns or anomalies.
+- Features:  
+  - Process/thread identifiers, processName, eventName.
+  - Syscall arguments, return values.
+  - Binary labels: `sus` (suspicious) and `evil` (malicious).
 
-## Data Exploration and Visualization {.smaller}
+---
 
-A study was conducted to determine how...
+## Event Distributions {.smaller}
 
-```{r, warning=FALSE, echo=F, message=FALSE}
-# loading packages 
-library(tidyverse)
-library(knitr)
-library(ggthemes)
-library(ggrepel)
-library(dslabs)
-```
 
-```{r, warning=FALSE, echo=F}
-# Load Data
-#kable(head(murders))
+**Figure 1:** Top 10 most common event names in the training data.
 
-ggplot1 = murders %>% ggplot(mapping = aes(x=population/10^6, y=total)) 
 
-  ggplot1 + geom_point(aes(col=region), size = 4) +
-  geom_text_repel(aes(label=abb)) +
-  scale_x_log10() +
-  scale_y_log10() +
-  geom_smooth(formula = "y~x", method=lm,se = F)+
-  xlab("Populations in millions (log10 scale)") + 
-  ylab("Total number of murders (log10 scale)") +
-  ggtitle("US Gun Murders in 2010") +
-  scale_color_discrete(name = "Region")+
-      theme_bw()
-  
 
-```
+**Figure 2:** Distribution of events over time by hour.
 
-## Modeling and Results
 
--   Explain your data preprocessing and cleaning steps.
+---
 
--   Present your key findings in a clear and concise manner.
+**Figure 3:** Frequency of anomalous vs. benign events in the test set.
 
--   Use visuals to support your claims.
+## Modeling and Results {.smaller} 
 
--   **Tell a story about what the data reveals.**
+### A. Model Architecture
 
-```{r}
+*LSTM Autoencoder:*
 
-```
+Encoder: LSTM(128) → LSTM(64) + Dropout.
+
+Decoder: LSTM(64) → LSTM(128) reconstructing input.
+
+Input shape: (batch_size, 8, 9).
+
+**Figure 4:** Model architecture
+
+
+## B. Training and Validation Performance {.smaller}
+
+- 5-fold cross-validation:
+
+  - Avg. validation loss: **0.1516 ± 0.1443.**
+
+- Stable convergence.
+
+**Figure 5:** Training & Validation Performance
+
+
+
+## C. Anomaly Detection Threshold {.smaller}
+
+Distribution of reconstruction error separates normal vs. anomalous.
+
+**Figure 6:** Reconstruction Error Distribution
+
+
+## D. Classification Metrics {.smaller}
+
+Precision: 99.3%, Recall: 99.5%, F1-score: 99.4%.
+
+**Figure 7:** Precision/Recall Curve
+
+## Confusion Matrix {.smaller}
+
+**Figure 8:** Confusion Matrix
+
+## ROC Curve {.smaller}
+
+ROC AUC = 99.5%.
+
+**Figure 9:** ROC Curve
 
 ## Conclusion
 
@@ -115,3 +167,4 @@ ggplot1 = murders %>% ggplot(mapping = aes(x=population/10^6, y=total))
 -   Discuss the implications of your results.
 
 ## References
+

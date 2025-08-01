@@ -148,6 +148,80 @@ Compared to older datasets like KDD’99 [@tavallaee2009detailed; @hettich1999uc
 
 ### 5. Data Preprocessing and Sequence Modeling
 
+```{r}
+
+library(googledrive)
+library(tidyverse)
+library(lubridate)
+library(keras)
+library(recipes)
+library(yardstick)
+library(rsample)
+library(data.table)
+
+# Install once if needed:
+install.packages("googledrive")
+install.packages("readr")
+
+library(googledrive)
+library(readr)
+
+
+# --- load_datasets.R ---
+
+library(googledrive)
+library(readr)
+
+# Google Drive file IDs (same mapping as your Python code)
+files <- list(
+  training   = "1PT-8M-Nbw8aBGXXdonN7QCe59AqEBYOs",
+  test       = "1y0OcL5_S0PtJW2aeUq5Qm7cy6ehdfuob",
+  validation = "1o_211YxzPtY2_Gz2d9xRfOALu7AjPzF_"
+)
+
+download_and_load_csv <- function(file_id, name) {
+  filename <- paste0(name, "_dataset.csv")
+  
+  # Download if file does not exist
+  if (!file.exists(filename)) {
+    message(sprintf("⬇ Downloading %s dataset from Google Drive...", name))
+    drive_download(as_id(file_id), path = filename, overwrite = TRUE)
+  } else {
+    message(sprintf("%s already exists.", filename))
+  }
+  
+  # Read CSV
+  tryCatch({
+    read_csv(filename, show_col_types = FALSE)
+  }, error = function(e) {
+    stop(sprintf("Could not load %s as CSV: %s", filename, e$message))
+  })
+}
+
+load_all_datasets <- function() {
+  datasets <- list()
+  for (name in names(files)) {
+    datasets[[name]] <- download_and_load_csv(files[[name]], name)
+  }
+  datasets
+}
+
+
+data <- load_all_datasets()
+train_df <- data$training
+val_df   <- data$validation
+test_df  <- data$test
+
+```
+
+```{r}
+# Convert UNIX timestamps to POSIXct
+for (df in list(train_df, val_df, test_df)) {
+  df$timestamp <- as_datetime(df$timestamp)
+}
+
+```
+
 To prepare the BETH dataset for LSTM modeling, we applied the following preprocessing steps:
 
 - **Feature extraction:** Key fields such as Timestamp, EventID, SyscallType, ProcessId, ReturnValue, and ArgsNum were selected based on relevance to behavioral analysis.
@@ -203,34 +277,74 @@ These metrics provide a robust, multidimensional assessment of the model’s eff
 To better understand the structure and composition of the BETH dataset, we begin by analyzing the process logs that serve as input to our LSTM-based anomaly detection model. The dataset comprises a total of 8,004,918 system events, among which a benchmark subset of approximately 763,145 records is reserved for training. The dataset is rich in temporal and categorical information, including process and thread identifiers, process names, system call arguments, return values, and two binary labels: sus (suspicious) and evil (malicious). The logs are chronologically ordered and contain a temporal feature (timestamp) suitable for sequential modeling. Each record represents an individual system event collected from one of 23 cloud-based honeypots. The data was split into training, validation, and test sets using a 60/20/20 ratio, where only the test set contains attack sequences.
 A descriptive analysis of the features reveals the heterogeneous nature of the dataset. The eventName field, for example, exhibits a long-tailed distribution, with certain events (e.g., execve, read, openat) appearing frequently, while others are rare and potentially indicative of anomalous behavior. The processName and hostName attributes also show high cardinality, which suggests the need for careful encoding strategies when preparing the data for modeling. An initial examination of the BETH training and test subsets reveals several insights into the nature of system-level activity across cloud-hosted honeypots. These observations have guided the formulation of our LSTM-based anomaly detection model.  
 
-#### 1.1 Event Frequency Distribution.  
-:::{.center}
-![Figure 3: Top 10 most common event names in the training data](1.png){width=550px}
-:::  
+#### 1.1 Event Frequency Distribution. 
+
+```{r}
+# Top 10 Event Names
+train_df %>%
+  count(eventName, sort = TRUE) %>%
+  slice_max(n, n = 10) %>%
+  ggplot(aes(x = n, y = reorder(eventName, n))) +
+  geom_col(fill = "steelblue") +
+  labs(title = "Top 10 Event Names in Training Data", x = "Frequency", y = "Event Name") +
+  theme_minimal()
+```
 
 As shown in Figure 3, the distribution of system events in the training data is highly skewed. The top three event types close, openat, and security_file_open collectively dominate the logs, each appearing over 150,000 times. In contrast, lower-frequency events such as getdents64 and socket are comparatively rare. This long-tailed distribution suggests that certain system calls represent routine behavior, while others though rare may hold critical information for detecting anomalies. Therefore, proper handling of categorical sparsity and rare event embedding is essential during preprocessing.    
 
 #### 1.2 Process Behavior
-:::{.center}
-![Figure 4: Most Frequent Process Names (Training Set) ](2.png){width=550px}
-:::
+
+```{r}
+# Top 10 Process Names
+train_df %>%
+  count(processName, sort = TRUE) %>%
+  slice_max(n, n = 10) %>%
+  ggplot(aes(x = n, y = reorder(processName, n))) +
+  geom_col(fill = "darkorchid") +
+  labs(title = "Top 10 Process Names in Training Data", x = "Frequency", y = "Process Name") +
+  theme_minimal()
+
+```
+
 A similar distribution is observed in processName. A small set of background processes account for a significant fraction of system activity. These are expected in benign operational scenarios. However, malicious processes are often less frequent and unpredictable. This motivates the need for a temporal modeling approach that generalizes from dominant patterns while remaining sensitive to rare deviations.  
 
 #### 1.3 Temporal Skew in Data Collection 
-:::{.center}
-![Figure 4: Distribution of events over time by hour.](3.png){width=500px}
-:::
+
+```{r}
+train_df %>%
+  mutate(hour = hour(timestamp)) %>%
+  ggplot(aes(x = factor(hour))) +
+  geom_bar(fill = "darkcyan") +
+  labs(title = "System Events Distribution by Hour (Training Data)",
+       x = "Hour of Day", y = "Number of Events") +
+  theme_minimal()
+
+```
 
 Figure 4 reveals a pronounced imbalance in the distribution of events across time. The vast majority of events in the training set are concentrated within a single hour of activity, with very limited representation beyond that point. This skew may reflect batch-mode logging or the constrained operational window of honeypot collection. As a result, the model must be designed to generalize temporal patterns from narrow windows of observed behavior, further motivating the use of memory-aware architectures like LSTM.  
 
-#### 1.4 Label Imbalance and Anomaly Prevalence    
-:::{.center}
-![Figure 5: Frequency of anomalous (evil) vs. benign events in the test set.](4.png){width=400px}
-:::
+#### 1.4 Label Imbalance and Anomaly Prevalence  
+
+```{r}
+test_df %>%
+  mutate(evil = factor(evil, levels = c(0, 1), labels = c("Benign (0)", "Malicious (1)"))) %>%
+  ggplot(aes(x = evil, fill = evil)) +
+  geom_bar() +
+  labs(title = "Malicious vs. Benign Events (Test Set)", x = "Evil Label", y = "Count") +
+  scale_fill_manual(values = c("steelblue", "firebrick")) +
+  theme_minimal()
+
+```
 
 Contrary to initial expectations, Figure 4 indicates that a substantial portion of the test data is labeled as malicious (evil = 1), with malicious events significantly outnumbering benign ones. This suggests that the dataset may contain attack-heavy test sequences designed for stress-testing anomaly detection models. This observation presents both a challenge and an opportunity: while class imbalance is often a barrier in anomaly detection, the abundance of labeled attacks in the test set allows for richer evaluation of model performance using standard classification metrics such as precision, recall, and F1-score.    
 
 #### 1.5 Implications for Modeling  
+```{r}
+for (df in list(train_df, val_df, test_df)) {
+  df$ground_truth <- as.integer(df$evil == 1)
+}
+
+```
 
 Taken together, these findings justify our modeling decisions in several ways: The long-tailed event distribution calls for embedding-based representations of categorical variables (e.g., eventName, processName).  
 
@@ -240,8 +354,10 @@ The label distribution in the test set supports a semi-supervised evaluation pro
 
 ### 2- Modeling and Results  
 
-##### 2.1 Model Architecture  
+##### 2.1 Model Architecture 
+
 The architecture of our anomaly detection system is based on an LSTM autoencoder trained exclusively on benign process sequences. The input to the model is a sliding window of look_back=8 consecutive events, each described by 9 features. The encoder consists of two LSTM layers with 128 and 64 hidden units, respectively, followed by dropout layers to prevent overfitting. The latent representation is repeated and passed to a symmetric decoder consisting of two LSTM layers that reconstruct the input sequence. The model is trained to minimize the Mean Absolute Error (MAE) between the original and reconstructed sequences. 
+
 
 :::{.center}
 ![Figure 6: LSTM Autoencoder architechture](5.png){width=400px}
