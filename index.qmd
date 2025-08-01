@@ -411,6 +411,5 @@ A key strength of this work lies in its adaptability. Because the method is unsu
 
 **Limitations and Future Work:** While the results are compelling, some limitations remain. The dataset’s temporal compression and event imbalance, as well as potential overfitting to benign process patterns, suggest the need for ongoing retraining as system behaviors evolve. Future enhancements could include integrating attention mechanisms, hybrid ensemble methods, or continual learning strategies to further improve detection sensitivity and adaptability.
 
-In summary, this project bridges advanced deep learning research with operational cybersecurity needs. By demonstrating that LSTM autoencoders can reliably flag anomalies in complex system logs without extensive labeled attack data, we provide a practical, scalable, and interpretable framework for next-generation intrusion detection. Our findings underscore the critical role of sequence-aware models in defending modern digital infrastructures against a rapidly evolving threat landscape.
-
+In summary, this project bridges advanced deep learning research with operational cybersecurity needs. By demonstrating that LSTM autoencoders can reliably flag anomalies in complex system logs without extensive labeled attack data, we provide a practical, scalable, and interpretable framework for next-generation intrusion detection. Our findings underscore the critical role of sequence-aware models in defending modern digital infrastructures against a rapidly evolving threat landscapes
 ## References
