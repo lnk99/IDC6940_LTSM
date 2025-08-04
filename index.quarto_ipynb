@@ -12,7 +12,10 @@
         "format:\n",
         "  html:\n",
         "    code-fold: true\n",
+<<<<<<< HEAD
         "jupyter: python3\n",
+=======
+>>>>>>> a2b7f38 (kii)
         "course: Capstone Projects in Data Science\n",
         "bibliography: references.bib # file contains bibtex for references\n",
         "#always_allow_html: true # this allows to get PDF with HTML features\n",
@@ -20,6 +23,10 @@
         "execute: \n",
         "  warning: false\n",
         "  message: false\n",
+<<<<<<< HEAD
+=======
+        "jupyter: python3\n",
+>>>>>>> a2b7f38 (kii)
         "editor: \n",
         "  markdown: \n",
         "    wrap: 72\n",
@@ -154,6 +161,7 @@
         "\n",
         "Compared to older datasets like KDD’99 [@tavallaee2009detailed; @hettich1999uci] or NSL-KDD, BETH reflects modern system-level behavior and attack techniques, providing a more accurate benchmark for current anomaly detection research.\n",
         "\n",
+<<<<<<< HEAD
         "### 5. Data Preprocessing and Sequence Modeling"
       ],
       "id": "10e90e7a"
@@ -167,6 +175,11 @@
       "id": "d88b8455",
       "execution_count": null,
       "outputs": []
+=======
+        "### 5. Data Preprocessing and Sequence Modeling\n"
+      ],
+      "id": "57d571c4"
+>>>>>>> a2b7f38 (kii)
     },
     {
       "cell_type": "code",
@@ -178,7 +191,10 @@
         "#| warning: false\n",
         "#| message: false\n",
         "\n",
+<<<<<<< HEAD
         "import gdown\n",
+=======
+>>>>>>> a2b7f38 (kii)
         "import pandas as pd\n",
         "import numpy as np\n",
         "import matplotlib.pyplot as plt\n",
@@ -196,7 +212,11 @@
         "# Load datasets\n",
         "try:\n",
         "    datasets = load_all_datasets()\n",
+<<<<<<< HEAD
         "    train_df = datasets[\"train\"]\n",
+=======
+        "    train_df = datasets[\"training\"]\n",
+>>>>>>> a2b7f38 (kii)
         "    val_df = datasets[\"validation\"]\n",
         "    test_df = datasets[\"test\"]\n",
         "    \n",
@@ -209,7 +229,11 @@
         "    print(f\"Failed to load datasets: {str(e)}\")\n",
         "    raise"
       ],
+<<<<<<< HEAD
       "id": "5f405866",
+=======
+      "id": "ea6b0bc5",
+>>>>>>> a2b7f38 (kii)
       "execution_count": null,
       "outputs": []
     },
@@ -272,10 +296,16 @@
         "To better understand the structure and composition of the BETH dataset, we begin by analyzing the process logs that serve as input to our LSTM-based anomaly detection model. The dataset comprises a total of 8,004,918 system events, among which a benchmark subset of approximately 763,145 records is reserved for training. The dataset is rich in temporal and categorical information, including process and thread identifiers, process names, system call arguments, return values, and two binary labels: sus (suspicious) and evil (malicious). The logs are chronologically ordered and contain a temporal feature (timestamp) suitable for sequential modeling. Each record represents an individual system event collected from one of 23 cloud-based honeypots. The data was split into training, validation, and test sets using a 60/20/20 ratio, where only the test set contains attack sequences.\n",
         "A descriptive analysis of the features reveals the heterogeneous nature of the dataset. The eventName field, for example, exhibits a long-tailed distribution, with certain events (e.g., execve, read, openat) appearing frequently, while others are rare and potentially indicative of anomalous behavior. The processName and hostName attributes also show high cardinality, which suggests the need for careful encoding strategies when preparing the data for modeling. An initial examination of the BETH training and test subsets reveals several insights into the nature of system-level activity across cloud-hosted honeypots. These observations have guided the formulation of our LSTM-based anomaly detection model.  \n",
         "\n",
+<<<<<<< HEAD
         "\n",
         "#### 1.1 Event Frequency Distribution. \n"
       ],
       "id": "c2cb1593"
+=======
+        "#### 1.1 Event Frequency Distribution. "
+      ],
+      "id": "d61d3203"
+>>>>>>> a2b7f38 (kii)
     },
     {
       "cell_type": "code",
@@ -291,7 +321,11 @@
         "plt.tight_layout()\n",
         "plt.show()"
       ],
+<<<<<<< HEAD
       "id": "a231d75b",
+=======
+      "id": "9841f1f4",
+>>>>>>> a2b7f38 (kii)
       "execution_count": null,
       "outputs": []
     },
@@ -303,7 +337,11 @@
         "\n",
         "#### 1.2 Process Behavior\n"
       ],
+<<<<<<< HEAD
       "id": "80c9f8e7"
+=======
+      "id": "7ccf0440"
+>>>>>>> a2b7f38 (kii)
     },
     {
       "cell_type": "code",
@@ -319,7 +357,11 @@
         "plt.tight_layout()\n",
         "plt.show()"
       ],
+<<<<<<< HEAD
       "id": "5e7aa0ac",
+=======
+      "id": "92a0cb01",
+>>>>>>> a2b7f38 (kii)
       "execution_count": null,
       "outputs": []
     },
@@ -331,7 +373,11 @@
         "\n",
         "#### 1.3 Temporal Skew in Data Collection \n"
       ],
+<<<<<<< HEAD
       "id": "9ae2faec"
+=======
+      "id": "54645b4f"
+>>>>>>> a2b7f38 (kii)
     },
     {
       "cell_type": "code",
@@ -347,7 +393,11 @@
         "plt.tight_layout()\n",
         "plt.show()"
       ],
+<<<<<<< HEAD
       "id": "6e983f55",
+=======
+      "id": "a6a4d550",
+>>>>>>> a2b7f38 (kii)
       "execution_count": null,
       "outputs": []
     },
@@ -357,9 +407,15 @@
       "source": [
         "Figure 4 reveals a pronounced imbalance in the distribution of events across time. The vast majority of events in the training set are concentrated within a single hour of activity, with very limited representation beyond that point. This skew may reflect batch-mode logging or the constrained operational window of honeypot collection. As a result, the model must be designed to generalize temporal patterns from narrow windows of observed behavior, further motivating the use of memory-aware architectures like LSTM.  \n",
         "\n",
+<<<<<<< HEAD
         "#### 1.4 Label Imbalance and Anomaly Prevalence  \n"
       ],
       "id": "8b88ce66"
+=======
+        "#### 1.4 Label Imbalance and Anomaly Prevalence  "
+      ],
+      "id": "7e64fd9f"
+>>>>>>> a2b7f38 (kii)
     },
     {
       "cell_type": "code",
@@ -375,7 +431,11 @@
         "plt.tight_layout()\n",
         "plt.show()"
       ],
+<<<<<<< HEAD
       "id": "332376aa",
+=======
+      "id": "10caab48",
+>>>>>>> a2b7f38 (kii)
       "execution_count": null,
       "outputs": []
     },
@@ -384,10 +444,16 @@
       "metadata": {},
       "source": [
         "Contrary to initial expectations, Figure 4 indicates that a substantial portion of the test data is labeled as malicious (evil = 1), with malicious events significantly outnumbering benign ones. This suggests that the dataset may contain attack-heavy test sequences designed for stress-testing anomaly detection models. This observation presents both a challenge and an opportunity: while class imbalance is often a barrier in anomaly detection, the abundance of labeled attacks in the test set allows for richer evaluation of model performance using standard classification metrics such as precision, recall, and F1-score.    \n",
+<<<<<<< HEAD
         "\n",
         "#### 1.4 Correlation\n"
       ],
       "id": "e02e9060"
+=======
+        "#### 1.4 Correlation"
+      ],
+      "id": "f0bcd457"
+>>>>>>> a2b7f38 (kii)
     },
     {
       "cell_type": "code",
@@ -398,7 +464,11 @@
         "    sns.heatmap(corr, ax = ax, annot=True, cmap=\"YlGnBu\")\n",
         "    ax.set_title(f'Correlation Plot for {title}')"
       ],
+<<<<<<< HEAD
       "id": "acefabc2",
+=======
+      "id": "14bcf2a9",
+>>>>>>> a2b7f38 (kii)
       "execution_count": null,
       "outputs": []
     },
@@ -415,7 +485,11 @@
         "for dataset, name, ax in zip(datasets, dataset_names, axs):\n",
         "    dataset_to_corr_heatmap(dataset, name, ax)"
       ],
+<<<<<<< HEAD
       "id": "e1f8bf93",
+=======
+      "id": "bdc06fa5",
+>>>>>>> a2b7f38 (kii)
       "execution_count": null,
       "outputs": []
     },
@@ -423,6 +497,7 @@
       "cell_type": "markdown",
       "metadata": {},
       "source": [
+<<<<<<< HEAD
         "All three of the datasets have a heavy correlation between userId and the associated labels which feature in the dataset (sus and/or evil).\n",
         "processid and threadid are highly correlated and seem to have similar correlation vaules across all three datasets. This means that they are representing pretty much the same thing and one of them could be dropped.\n",
         "The correlation plots all look significantly different.\n",
@@ -430,6 +505,11 @@
         "#### 1.4 Boxplot \n"
       ],
       "id": "535a602d"
+=======
+        "#### 1.4 Boxplot"
+      ],
+      "id": "075accb6"
+>>>>>>> a2b7f38 (kii)
     },
     {
       "cell_type": "code",
@@ -457,7 +537,11 @@
         "plt.xticks([1,2,3],labels=['train', 'test', 'validate'])\n",
         "plt.show()"
       ],
+<<<<<<< HEAD
       "id": "b52f1d23",
+=======
+      "id": "469c78de",
+>>>>>>> a2b7f38 (kii)
       "execution_count": null,
       "outputs": []
     },
@@ -487,7 +571,11 @@
         "plt.xticks([1,2,3],labels=['train', 'test', 'validate'])\n",
         "plt.show()"
       ],
+<<<<<<< HEAD
       "id": "4e8e03f8",
+=======
+      "id": "a764b773",
+>>>>>>> a2b7f38 (kii)
       "execution_count": null,
       "outputs": []
     },
@@ -497,6 +585,17 @@
       "source": [
         "#### 1.5 Implications for Modeling  \n",
         "\n",
+<<<<<<< HEAD
+=======
+        "```{r}\n",
+        "for (df in list(train_df, val_df, test_df)) {\n",
+        "  df$ground_truth <- as.integer(df$evil == 1)\n",
+        "}\n",
+        "\n",
+        "```\n",
+        "\n",
+        "\n",
+>>>>>>> a2b7f38 (kii)
         "Taken together, these findings justify our modeling decisions in several ways: The long-tailed event distribution calls for embedding-based representations of categorical variables (e.g., eventName, processName).  \n",
         "\n",
         "The temporal compression of training data highlights the need for architectures that generalize across short but informative sequences.  \n",
@@ -505,19 +604,29 @@
         "\n",
         "### 2- Modeling and Results  \n",
         "\n",
+<<<<<<< HEAD
         "\n",
+=======
+>>>>>>> a2b7f38 (kii)
         "##### 2.1 Model Architecture \n",
         "\n",
         "The architecture of our anomaly detection system is based on an LSTM autoencoder trained exclusively on benign process sequences. The input to the model is a sliding window of look_back=8 consecutive events, each described by 9 features. The encoder consists of two LSTM layers with 128 and 64 hidden units, respectively, followed by dropout layers to prevent overfitting. The latent representation is repeated and passed to a symmetric decoder consisting of two LSTM layers that reconstruct the input sequence. The model is trained to minimize the Mean Absolute Error (MAE) between the original and reconstructed sequences. \n"
       ],
+<<<<<<< HEAD
       "id": "f7f19e8f"
+=======
+      "id": "72d64f13"
+>>>>>>> a2b7f38 (kii)
     },
     {
       "cell_type": "code",
       "metadata": {},
       "source": [
+<<<<<<< HEAD
         "from sklearn.preprocessing import LabelEncoder, StandardScaler\n",
         "\n",
+=======
+>>>>>>> a2b7f38 (kii)
         "# Assign ground truth: 0=benign (evil=0), 1=malicious (evil=1)\n",
         "for df in [train_df, val_df, test_df]:\n",
         "    df['ground_truth'] = df['evil'].apply(lambda x: 1 if x == 1 else 0)\n",
@@ -543,7 +652,11 @@
         "val_df[features] = scaler.transform(val_df[features])\n",
         "test_df[features] = scaler.transform(test_df[features])"
       ],
+<<<<<<< HEAD
       "id": "b6d95422",
+=======
+      "id": "dea1d0d9",
+>>>>>>> a2b7f38 (kii)
       "execution_count": null,
       "outputs": []
     },
@@ -572,11 +685,16 @@
         "print(\"X_test shape:\", X_test.shape)\n",
         "print(\"y_test distribution:\", np.bincount(y_test))"
       ],
+<<<<<<< HEAD
       "id": "70a34448",
+=======
+      "id": "a8e71dc3",
+>>>>>>> a2b7f38 (kii)
       "execution_count": null,
       "outputs": []
     },
     {
+<<<<<<< HEAD
       "cell_type": "markdown",
       "metadata": {},
       "source": [
@@ -603,32 +721,56 @@
         "def build_lstm_autoencoder(input_shape, latent_dim=64, dropout=0.1, learning_rate=1e-3):\n",
         "    inputs = layers.Input(shape=input_shape)\n",
         "    \n",
+=======
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#LSTM Autoencoder model\n",
+        "def build_lstm_autoencoder(input_shape, latent_dim=64, dropout=0.1, learning_rate=1e-3):\n",
+        "    inputs = layers.Input(shape=input_shape)\n",
+>>>>>>> a2b7f38 (kii)
         "    # Encoder\n",
         "    x = layers.LSTM(128, activation='relu', return_sequences=True)(inputs)\n",
         "    x = layers.Dropout(dropout)(x)\n",
         "    x = layers.LSTM(latent_dim, activation='relu', return_sequences=False)(x)\n",
         "    encoded = layers.Dropout(dropout)(x)\n",
+<<<<<<< HEAD
         "    \n",
         "    # Repeat vector for decoder (Bottleneck)\n",
         "    x = layers.RepeatVector(input_shape[0])(encoded)\n",
         "    \n",
+=======
+        "    # Repeat vector for decoder (Bottleneck)\n",
+        "    x = layers.RepeatVector(input_shape[0])(encoded)\n",
+>>>>>>> a2b7f38 (kii)
         "    # Decoder\n",
         "    x = layers.LSTM(latent_dim, activation='relu', return_sequences=True)(x)\n",
         "    x = layers.Dropout(dropout)(x)\n",
         "    x = layers.LSTM(128, activation='relu', return_sequences=True)(x)\n",
+<<<<<<< HEAD
         "    x = layers.Dropout(dropout)(x)\n",
         "    decoded = layers.TimeDistributed(layers.Dense(input_shape[1]))(x)\n",
         "\n",
         "    model = Model(inputs, decoded)\n",
         "    model.compile(optimizer=keras.optimizers.Adam(learning_rate=learning_rate), \n",
         "                 loss='mae')\n",
+=======
+        "    decoded = layers.TimeDistributed(layers.Dense(input_shape[1]))(x)\n",
+        "\n",
+        "    model = Model(inputs, decoded)\n",
+        "    model.compile(optimizer=keras.optimizers.Adam(learning_rate=learning_rate), loss='mae')\n",
+>>>>>>> a2b7f38 (kii)
         "    return model\n",
         "\n",
         "input_shape = X_train.shape[1:]\n",
         "model = build_lstm_autoencoder(input_shape, latent_dim=64, dropout=0.1, learning_rate=1e-3)\n",
         "model.summary()"
       ],
+<<<<<<< HEAD
       "id": "a0eb99d4",
+=======
+      "id": "431210c2",
+>>>>>>> a2b7f38 (kii)
       "execution_count": null,
       "outputs": []
     },
@@ -643,7 +785,11 @@
         "\n",
         "We first evaluate the generalization capability of the model using a 5-fold time-series cross-validation performed on benign data only. For each fold, the model is trained on a different temporal split and evaluated on future sequences to simulate realistic detection scenarios.  \n"
       ],
+<<<<<<< HEAD
       "id": "ac44b74b"
+=======
+      "id": "51ca56cb"
+>>>>>>> a2b7f38 (kii)
     },
     {
       "cell_type": "code",
@@ -674,9 +820,16 @@
         "    print(f\"Fold {fold+1} validation loss: {val_loss:.6f}\")\n",
         "    val_losses.append(val_loss)\n",
         "\n",
+<<<<<<< HEAD
         "print(f\"\\nMean validation loss over {k} folds: {np.mean(val_losses):.6f} (+/- {np.std(val_losses):.6f})\")"
       ],
       "id": "a661078b",
+=======
+        "print(f\"\\nMean validation loss over {k} folds: {np.mean(val_losses):.6f} (+/- {np.std(val_losses):.6f})\")\n",
+        "model.save('/content/drive/MyDrive/Dataset_capstone/model.h5')\n"
+      ],
+      "id": "322e909a",
+>>>>>>> a2b7f38 (kii)
       "execution_count": null,
       "outputs": []
     },
@@ -684,6 +837,10 @@
       "cell_type": "code",
       "metadata": {},
       "source": [
+<<<<<<< HEAD
+=======
+        "model.save(\"my_model.keras\")\n",
+>>>>>>> a2b7f38 (kii)
         "plt.plot(history.history['loss'], label='Training Loss')\n",
         "plt.plot(history.history['val_loss'], label='Validation Loss')\n",
         "plt.xlabel('Epoch')\n",
@@ -691,7 +848,11 @@
         "plt.legend()\n",
         "plt.show()"
       ],
+<<<<<<< HEAD
       "id": "b527ada1",
+=======
+      "id": "bac47f5c",
+>>>>>>> a2b7f38 (kii)
       "execution_count": null,
       "outputs": []
     },
@@ -705,7 +866,11 @@
         "#### 2.3 Anomaly Detection Threshold\n",
         "The trained model was then used to compute reconstruction errors over the test set. The distribution of reconstruction errors clearly shows a distinguishable separation between normal and anomalous sequences \n"
       ],
+<<<<<<< HEAD
       "id": "0e802927"
+=======
+      "id": "b93c893a"
+>>>>>>> a2b7f38 (kii)
     },
     {
       "cell_type": "code",
@@ -722,7 +887,11 @@
         "plt.ylabel(\"Count\")\n",
         "plt.show()"
       ],
+<<<<<<< HEAD
       "id": "7ed90db3",
+=======
+      "id": "f73593f3",
+>>>>>>> a2b7f38 (kii)
       "execution_count": null,
       "outputs": []
     },
@@ -732,7 +901,11 @@
       "source": [
         "To convert reconstruction error into binary predictions, we used the precision-recall curve to find the optimal threshold that maximizes the F1-score: 0.9549.\n"
       ],
+<<<<<<< HEAD
       "id": "469f419f"
+=======
+      "id": "bb9c5fc4"
+>>>>>>> a2b7f38 (kii)
     },
     {
       "cell_type": "code",
@@ -741,6 +914,7 @@
         "precision, recall, thresholds = precision_recall_curve(y_test, test_mae)\n",
         "f1 = 2 * (precision * recall) / (precision + recall + 1e-10)\n",
         "best_threshold = thresholds[np.argmax(f1)]\n",
+<<<<<<< HEAD
         "print(f\"Best threshold by max F1: {best_threshold:.4f}\")"
       ],
       "id": "aedd29a6",
@@ -751,6 +925,9 @@
       "cell_type": "code",
       "metadata": {},
       "source": [
+=======
+        "print(f\"Best threshold by max F1: {best_threshold:.4f}\")\n",
+>>>>>>> a2b7f38 (kii)
         "plt.plot(thresholds, precision[:-1], label='Precision')\n",
         "plt.plot(thresholds, recall[:-1], label='Recall')\n",
         "plt.plot(thresholds, f1[:-1], label='F1')\n",
@@ -760,7 +937,11 @@
         "plt.title(\"Precision/Recall/F1 vs Threshold\")\n",
         "plt.show()"
       ],
+<<<<<<< HEAD
       "id": "c4dd1784",
+=======
+      "id": "1bdcd0ab",
+>>>>>>> a2b7f38 (kii)
       "execution_count": null,
       "outputs": []
     },
@@ -769,9 +950,15 @@
       "metadata": {},
       "source": [
         "#### 2.4 Classification Metrics\n",
+<<<<<<< HEAD
         "Once the best threshold was determined, we applied it to the test set. The model successfully identified anomalous sequences with high accuracy of 99%. The confusion matrix below shows that most benign and malicious events are correctly classified. \n"
       ],
       "id": "059e72c3"
+=======
+        "Once the best threshold was determined, we applied it to the test set. The model successfully identified anomalous sequences with high accuracy of 99%. The confusion matrix below shows that most benign and malicious events are correctly classified.  "
+      ],
+      "id": "12f843e3"
+>>>>>>> a2b7f38 (kii)
     },
     {
       "cell_type": "code",
@@ -782,6 +969,11 @@
         "\n",
         "# Confusion matrix\n",
         "cm = confusion_matrix(y_test, y_pred)\n",
+<<<<<<< HEAD
+=======
+        "print(\"Confusion Matrix:\\n\", cm)\n",
+        "\n",
+>>>>>>> a2b7f38 (kii)
         "# Metrics\n",
         "acc = accuracy_score(y_test, y_pred)\n",
         "prec = precision_score(y_test, y_pred)\n",
@@ -789,6 +981,7 @@
         "f1s = f1_score(y_test, y_pred)\n",
         "fpr = cm[0,1] / (cm[0,0] + cm[0,1])\n",
         "fnr = cm[1,0] / (cm[1,0] + cm[1,1])\n",
+<<<<<<< HEAD
         "roc_auc = roc_auc_score(y_test, test_mae)\n",
         "print(f\"Accuracy: {acc:.3f}\")\n",
         "print(f\"Precision: {prec:.3f}\")\n",
@@ -799,6 +992,11 @@
         "print(f\"ROC AUC: {roc_auc:.3f}\")"
       ],
       "id": "d68c2db6",
+=======
+        "roc_auc = roc_auc_score(y_test, test_mae)"
+      ],
+      "id": "06b85484",
+>>>>>>> a2b7f38 (kii)
       "execution_count": null,
       "outputs": []
     },
@@ -815,7 +1013,11 @@
         "plt.title('Confusion Matrix')\n",
         "plt.show()"
       ],
+<<<<<<< HEAD
       "id": "783fe69a",
+=======
+      "id": "37efc098",
+>>>>>>> a2b7f38 (kii)
       "execution_count": null,
       "outputs": []
     },
@@ -830,7 +1032,11 @@
         "\n",
         "The high recall suggests the model captures almost all malicious behavior, which is critical for a cybersecurity context. The small false positive rate (3.4%) indicates that few benign sequences are misclassified, making this model practical for real-time deployment where false alarms are costly. The ROC curve and AUC value confirm the model's excellent discriminatory power between normal and malicious activity.\n"
       ],
+<<<<<<< HEAD
       "id": "04a4e315"
+=======
+      "id": "9e8e495c"
+>>>>>>> a2b7f38 (kii)
     },
     {
       "cell_type": "code",
@@ -845,7 +1051,11 @@
         "plt.legend()\n",
         "plt.show()"
       ],
+<<<<<<< HEAD
       "id": "6e8699d5",
+=======
+      "id": "9ad3a1e1",
+>>>>>>> a2b7f38 (kii)
       "execution_count": null,
       "outputs": []
     },
@@ -872,7 +1082,11 @@
         "In summary, this project bridges advanced deep learning research with operational cybersecurity needs. By demonstrating that LSTM autoencoders can reliably flag anomalies in complex system logs without extensive labeled attack data, we provide a practical, scalable, and interpretable framework for next-generation intrusion detection. Our findings underscore the critical role of sequence-aware models in defending modern digital infrastructures against a rapidly evolving threat landscapes\n",
         "## References"
       ],
+<<<<<<< HEAD
       "id": "b7cb75ac"
+=======
+      "id": "93fc8199"
+>>>>>>> a2b7f38 (kii)
     }
   ],
   "metadata": {
@@ -880,7 +1094,11 @@
       "name": "python3",
       "language": "python",
       "display_name": "Python 3 (ipykernel)",
+<<<<<<< HEAD
       "path": "C:\\Users\\ngawa\\Downloads\\caps\\IDC6940_LTSM\\venv\\share\\jupyter\\kernels\\python3"
+=======
+      "path": "/usr/local/share/jupyter/kernels/python3"
+>>>>>>> a2b7f38 (kii)
     }
   },
   "nbformat": 4,

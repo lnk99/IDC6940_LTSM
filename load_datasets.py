@@ -1,5 +1,8 @@
+<<<<<<< HEAD
 #!pip install gdown pandas numpy matplotlib seaborn scikit-learn tensorflow keras-tuner
 
+=======
+>>>>>>> a2b7f38 (kii)
 import pandas as pd
 import gdown
 import os
