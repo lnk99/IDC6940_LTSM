@@ -1,3 +1,8 @@
+#library(reticulate)
+#use_python("C:/Users/ngawa/Downloads/caps/IDC6940_LTSM/venv/Scripts/python.exe", required = TRUE)
+#py_module_available("tensorflow")
+#py_run_string("import tensorflow as tf; print(tf.__version__)")
+
 import pandas as pd
 import gdown
 import os
