@@ -14,6 +14,7 @@ self-contained: true
 execute: 
   warning: false
   message: false
+jupyter: python3
 editor: 
   markdown: 
     wrap: 72
@@ -146,8 +147,19 @@ Table1: The description and type of each feature
 - **Accessibility:** The dataset is publicly available, enabling reproducibility and peer comparison.  
 
 Compared to older datasets like KDD’99 [@tavallaee2009detailed; @hettich1999uci] or NSL-KDD, BETH reflects modern system-level behavior and attack techniques, providing a more accurate benchmark for current anomaly detection research.
+```{python}
+!pip install keras-tuner
+!pip install pandas numpy matplotlib seaborn scikit-learn tensorflow keras-tuner
+!pip install gdown pandas numpy matplotlib seaborn scikit-learn tensorflow keras-tuner
+```
 
 ### 5. Data Preprocessing and Sequence Modeling
+<<<<<<< HEAD
+```{python}
+#!pip install gdown
+```
+=======
+>>>>>>> a2b7f38 (kii)
 
 ```{python}
 ## Setup and Data Loading
@@ -156,7 +168,14 @@ Compared to older datasets like KDD’99 [@tavallaee2009detailed; @hettich1999uc
 #| warning: false
 #| message: false
 
+<<<<<<< HEAD
 import gdown
+=======
+<<<<<<< HEAD
+import gdown
+=======
+>>>>>>> a2b7f38 (kii)
+>>>>>>> 69916fe3069a2d44f625f2ea3fad77bd53af6a70
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -174,7 +193,15 @@ os.environ["KERAS_BACKEND"] = "tensorflow"
 # Load datasets
 try:
     datasets = load_all_datasets()
+<<<<<<< HEAD
     train_df = datasets["train"]
+=======
+<<<<<<< HEAD
+    train_df = datasets["train"]
+=======
+    train_df = datasets["training"]
+>>>>>>> a2b7f38 (kii)
+>>>>>>> 69916fe3069a2d44f625f2ea3fad77bd53af6a70
     val_df = datasets["validation"]
     test_df = datasets["test"]
     
@@ -247,6 +274,14 @@ A descriptive analysis of the features reveals the heterogeneous nature of the d
 
 #### 1.1 Event Frequency Distribution. 
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> a2b7f38 (kii)
+>>>>>>> 69916fe3069a2d44f625f2ea3fad77bd53af6a70
 ```{python}
 # ---- FIGURE 1: Most common event names in training data ----
 plt.figure(figsize=(10, 5))
@@ -258,6 +293,7 @@ plt.ylabel("Event Name")
 plt.tight_layout()
 plt.show()
 ```
+
 
 As shown in Figure 3, the distribution of system events in the training data is highly skewed. The top three event types close, openat, and security_file_open collectively dominate the logs, each appearing over 150,000 times. In contrast, lower-frequency events such as getdents64 and socket are comparatively rare. This long-tailed distribution suggests that certain system calls represent routine behavior, while others though rare may hold critical information for detecting anomalies. Therefore, proper handling of categorical sparsity and rare event embedding is essential during preprocessing.    
 
@@ -275,6 +311,7 @@ plt.tight_layout()
 plt.show()
 ```
 
+
 A similar distribution is observed in processName. A small set of background processes account for a significant fraction of system activity. These are expected in benign operational scenarios. However, malicious processes are often less frequent and unpredictable. This motivates the need for a temporal modeling approach that generalizes from dominant patterns while remaining sensitive to rare deviations.  
 
 #### 1.3 Temporal Skew in Data Collection 
@@ -291,10 +328,14 @@ plt.tight_layout()
 plt.show()
 ```
 
+
 Figure 4 reveals a pronounced imbalance in the distribution of events across time. The vast majority of events in the training set are concentrated within a single hour of activity, with very limited representation beyond that point. This skew may reflect batch-mode logging or the constrained operational window of honeypot collection. As a result, the model must be designed to generalize temporal patterns from narrow windows of observed behavior, further motivating the use of memory-aware architectures like LSTM.  
 
 #### 1.4 Label Imbalance and Anomaly Prevalence  
+<<<<<<< HEAD
 
+=======
+>>>>>>> 69916fe3069a2d44f625f2ea3fad77bd53af6a70
 ```{python}
 # ---- FIGURE 3: Count of evil vs. benign events in test set ----
 plt.figure(figsize=(6, 4))
@@ -307,7 +348,20 @@ plt.tight_layout()
 plt.show()
 ```
 
-Contrary to initial expectations, Figure 4 indicates that a substantial portion of the test data is labeled as malicious (evil = 1), with malicious events significantly outnumbering benign ones. This suggests that the dataset may contain attack-heavy test sequences designed for stress-testing anomaly detection models. This observation presents both a challenge and an opportunity: while class imbalance is often a barrier in anomaly detection, the abundance of labeled attacks in the test set allows for richer evaluation of model performance using standard classification metrics such as precision, recall, and F1-score.    
+<<<<<<< HEAD
+```{python}
+# ---- FIGURE 3: Count of evil vs. benign events in test set ----
+plt.figure(figsize=(6, 4))
+sns.countplot(data=test_df, x='evil', palette='coolwarm')
+plt.title("Malicious vs. Benign Events (Test Set)")
+plt.xlabel("Evil Label")
+plt.ylabel("Count")
+plt.xticks([0, 1], ['Benign (0)', 'Malicious (1)'])
+plt.tight_layout()
+plt.show()
+=======
+
+Contrary to initial expectations, Figure 4 indicates that a substantial portion of the test data is labeled as malicious (evil = 1), with malicious events significantly outnumbering benign ones. This suggests that the dataset may contain attack-heavy test sequences designed for stress-testing anomaly detection models. This observation presents both a challenge and an opportunity: while class imbalance is often a barrier in anomaly detection, the abundance of labeled attacks in the test set allows for richer evaluation of model performance using standard classification metrics such as precision, recall, and F1-score. 
 
 #### 1.4 Correlation
 
@@ -383,7 +437,171 @@ plt.ylabel("Variation values")
 plt.xticks([1,2,3],labels=['train', 'test', 'validate'])
 plt.show()
 
+>>>>>>> a2b7f38 (kii)
 ```
+
+
+
+<<<<<<< HEAD
+#### 1.4 Correlation
+
+```{python}
+def dataset_to_corr_heatmap(dataframe, title, ax):
+    corr = dataframe.corr(numeric_only=True)
+    sns.heatmap(corr, ax = ax, annot=True, cmap="YlGnBu")
+    ax.set_title(f'Correlation Plot for {title}')
+```
+
+```{python}
+fig, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize = (15,20))
+fig.tight_layout(pad=10.0)
+datasets = [train_df, test_df, val_df]
+dataset_names = ['train', 'test', 'validation']
+axs = [ax1, ax2, ax3]
+
+for dataset, name, ax in zip(datasets, dataset_names, axs):
+    dataset_to_corr_heatmap(dataset, name, ax)
+```
+
+All three of the datasets have a heavy correlation between userId and the associated labels which feature in the dataset (sus and/or evil).
+processid and threadid are highly correlated and seem to have similar correlation vaules across all three datasets. This means that they are representing pretty much the same thing and one of them could be dropped.
+The correlation plots all look significantly different.
+
+#### 1.4 Boxplot 
+
+```{python}
+from scipy import stats
+datasets = [train_df, test_df, val_df]
+
+entropy_values = []
+for dataset in datasets:
+    dataset_entropy_values = []
+    for col in dataset.columns:
+        if col == 'timestamp':
+            pass
+        else:
+            counts = dataset[col].value_counts()
+            col_entropy = stats.entropy(counts)
+            dataset_entropy_values.append(col_entropy)
+
+    entropy_values.append(dataset_entropy_values)
+
+plt.boxplot(entropy_values)
+plt.title('Boxplot of Entropy Values')
+plt.ylabel("entropy values")
+plt.xticks([1,2,3],labels=['train', 'test', 'validate'])
+plt.show()
+```
+
+
+```{python}
+from scipy import stats
+datasets = [train_df, test_df, val_df]
+
+variation_values = []
+for dataset in datasets:
+    dataset_variation_values = []
+    for col in dataset.columns:
+        if col == 'timestamp':
+            pass
+        else:
+            counts = dataset[col].value_counts()
+            col_variation = stats.variation(counts)
+            dataset_variation_values.append(col_variation)
+
+    variation_values.append(dataset_variation_values)
+
+plt.boxplot(variation_values)
+plt.title('Boxplot of Variation Values')
+plt.ylabel("Variation values")
+plt.xticks([1,2,3],labels=['train', 'test', 'validate'])
+plt.show()
+
+```
+=======
+#### 1.5 Implications for Modeling  
+>>>>>>> a2b7f38 (kii)
+
+
+<<<<<<< HEAD
+#### 1.4 Correlation
+
+```{python}
+def dataset_to_corr_heatmap(dataframe, title, ax):
+    corr = dataframe.corr(numeric_only=True)
+    sns.heatmap(corr, ax = ax, annot=True, cmap="YlGnBu")
+    ax.set_title(f'Correlation Plot for {title}')
+```
+
+```{python}
+fig, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize = (15,20))
+fig.tight_layout(pad=10.0)
+datasets = [train_df, test_df, val_df]
+dataset_names = ['train', 'test', 'validation']
+axs = [ax1, ax2, ax3]
+
+for dataset, name, ax in zip(datasets, dataset_names, axs):
+    dataset_to_corr_heatmap(dataset, name, ax)
+```
+
+All three of the datasets have a heavy correlation between userId and the associated labels which feature in the dataset (sus and/or evil).
+processid and threadid are highly correlated and seem to have similar correlation vaules across all three datasets. This means that they are representing pretty much the same thing and one of them could be dropped.
+The correlation plots all look significantly different.
+
+#### 1.4 Boxplot 
+
+```{python}
+from scipy import stats
+datasets = [train_df, test_df, val_df]
+
+entropy_values = []
+for dataset in datasets:
+    dataset_entropy_values = []
+    for col in dataset.columns:
+        if col == 'timestamp':
+            pass
+        else:
+            counts = dataset[col].value_counts()
+            col_entropy = stats.entropy(counts)
+            dataset_entropy_values.append(col_entropy)
+
+    entropy_values.append(dataset_entropy_values)
+
+plt.boxplot(entropy_values)
+plt.title('Boxplot of Entropy Values')
+plt.ylabel("entropy values")
+plt.xticks([1,2,3],labels=['train', 'test', 'validate'])
+plt.show()
+```
+
+
+```{python}
+from scipy import stats
+datasets = [train_df, test_df, val_df]
+
+variation_values = []
+for dataset in datasets:
+    dataset_variation_values = []
+    for col in dataset.columns:
+        if col == 'timestamp':
+            pass
+        else:
+            counts = dataset[col].value_counts()
+            col_variation = stats.variation(counts)
+            dataset_variation_values.append(col_variation)
+
+    variation_values.append(dataset_variation_values)
+
+plt.boxplot(variation_values)
+plt.title('Boxplot of Variation Values')
+plt.ylabel("Variation values")
+plt.xticks([1,2,3],labels=['train', 'test', 'validate'])
+plt.show()
+
+```
+=======
+#### 1.5 Implications for Modeling  
+>>>>>>> 69916fe3069a2d44f625f2ea3fad77bd53af6a70
 
 
 #### 1.5 Implications for Modeling  
@@ -429,7 +647,14 @@ train_df[features] = scaler.fit_transform(train_df[features])
 val_df[features] = scaler.transform(val_df[features])
 test_df[features] = scaler.transform(test_df[features])
 ```
+<<<<<<< HEAD
 
+=======
+<<<<<<< HEAD
+
+=======
+>>>>>>> a2b7f38 (kii)
+>>>>>>> 69916fe3069a2d44f625f2ea3fad77bd53af6a70
 ```{python}
 def create_sequences(df, features, look_back=8):
     data_array = df[features].values
@@ -453,6 +678,17 @@ print("X_test shape:", X_test.shape)
 print("y_test distribution:", np.bincount(y_test))
 
 ```
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+```{r}
+#library(reticulate)
+#use_python("C:/Users/ngawa/Downloads/caps/IDC6940_LTSM/venv/Scripts/python.exe", required = TRUE)
+#py_module_available("tensorflow")
+#py_run_string("import tensorflow as tf; print(tf.__version__)")
+```
+
+>>>>>>> 69916fe3069a2d44f625f2ea3fad77bd53af6a70
 
 
 
@@ -467,25 +703,61 @@ from tensorflow import keras
 def build_lstm_autoencoder(input_shape, latent_dim=64, dropout=0.1, learning_rate=1e-3):
     inputs = layers.Input(shape=input_shape)
     
+<<<<<<< HEAD
+=======
+=======
+
+```{python}
+from tensorflow.keras import layers, Model
+
+#LSTM Autoencoder model
+def build_lstm_autoencoder(input_shape, latent_dim=64, dropout=0.1, learning_rate=1e-3):
+    inputs = layers.Input(shape=input_shape)
+>>>>>>> a2b7f38 (kii)
+>>>>>>> 69916fe3069a2d44f625f2ea3fad77bd53af6a70
     # Encoder
     x = layers.LSTM(128, activation='relu', return_sequences=True)(inputs)
     x = layers.Dropout(dropout)(x)
     x = layers.LSTM(latent_dim, activation='relu', return_sequences=False)(x)
     encoded = layers.Dropout(dropout)(x)
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> 69916fe3069a2d44f625f2ea3fad77bd53af6a70
     
     # Repeat vector for decoder (Bottleneck)
     x = layers.RepeatVector(input_shape[0])(encoded)
     
+<<<<<<< HEAD
+=======
+=======
+    # Repeat vector for decoder (Bottleneck)
+    x = layers.RepeatVector(input_shape[0])(encoded)
+>>>>>>> a2b7f38 (kii)
+>>>>>>> 69916fe3069a2d44f625f2ea3fad77bd53af6a70
     # Decoder
     x = layers.LSTM(latent_dim, activation='relu', return_sequences=True)(x)
     x = layers.Dropout(dropout)(x)
     x = layers.LSTM(128, activation='relu', return_sequences=True)(x)
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> 69916fe3069a2d44f625f2ea3fad77bd53af6a70
     x = layers.Dropout(dropout)(x)
     decoded = layers.TimeDistributed(layers.Dense(input_shape[1]))(x)
 
     model = Model(inputs, decoded)
     model.compile(optimizer=keras.optimizers.Adam(learning_rate=learning_rate), 
                  loss='mae')
+<<<<<<< HEAD
+=======
+=======
+    decoded = layers.TimeDistributed(layers.Dense(input_shape[1]))(x)
+
+    model = Model(inputs, decoded)
+    model.compile(optimizer=keras.optimizers.Adam(learning_rate=learning_rate), loss='mae')
+>>>>>>> a2b7f38 (kii)
+>>>>>>> 69916fe3069a2d44f625f2ea3fad77bd53af6a70
     return model
 
 input_shape = X_train.shape[1:]
@@ -499,9 +771,59 @@ The final input tensor shape is (batch_size, 8, 9), corresponding to 8 time step
 
 We first evaluate the generalization capability of the model using a 5-fold time-series cross-validation performed on benign data only. For each fold, the model is trained on a different temporal split and evaluated on future sequences to simulate realistic detection scenarios.  
 
+<<<<<<< HEAD
 :::{.center}
 ![Figure 7: Training / validation Loss result](6.png){width=600px}
 :::
+=======
+```{python}
+#apply cross validaion on 5 fold (val+train)
+from sklearn.model_selection import TimeSeriesSplit
+
+full_benign_df = pd.concat([train_df, val_df])
+X_benign, _ = create_sequences(full_benign_df, features, look_back=8)
+
+k = 5
+tscv = TimeSeriesSplit(n_splits=k)
+val_losses = []
+
+for fold, (train_idx, val_idx) in enumerate(tscv.split(X_benign)):
+    print(f"\nFold {fold+1}/{k}")
+    X_tr, X_val = X_benign[train_idx], X_benign[val_idx]
+    model = build_lstm_autoencoder(X_tr.shape[1:])
+    early_stop = callbacks.EarlyStopping(monitor='val_loss', patience=8, restore_best_weights=True)
+    history=model.fit(X_tr, X_tr,
+              validation_data=(X_val, X_val),
+              epochs=15,
+              batch_size=128,
+              callbacks=[early_stop],
+              verbose=1)
+    val_loss = model.evaluate(X_val, X_val, verbose=0)
+    print(f"Fold {fold+1} validation loss: {val_loss:.6f}")
+    val_losses.append(val_loss)
+
+print(f"\nMean validation loss over {k} folds: {np.mean(val_losses):.6f} (+/- {np.std(val_losses):.6f})")
+<<<<<<< HEAD
+```
+
+```{python}
+=======
+model.save('/content/drive/MyDrive/Dataset_capstone/model.h5')
+
+
+```
+```{python}
+model.save("my_model.keras")
+>>>>>>> a2b7f38 (kii)
+plt.plot(history.history['loss'], label='Training Loss')
+plt.plot(history.history['val_loss'], label='Validation Loss')
+plt.xlabel('Epoch')
+plt.ylabel('Loss')
+plt.legend()
+plt.show()
+```
+
+>>>>>>> 69916fe3069a2d44f625f2ea3fad77bd53af6a70
 
 The average validation loss across folds was: 0.142291 (+/-0.128335). After cross-validation, the model was retrained on the full benign training set. The final training and validation losses indicate stable convergence without overfitting as we can see on the figure above
 
@@ -509,16 +831,115 @@ The average validation loss across folds was: 0.142291 (+/-0.128335). After cros
 #### 2.3 Anomaly Detection Threshold
 The trained model was then used to compute reconstruction errors over the test set. The distribution of reconstruction errors clearly shows a distinguishable separation between normal and anomalous sequences 
 
+<<<<<<< HEAD
 ![Figure 8: Histogram of test reconstruction errors (MAE)](7.png){fig-align="center" width=800px}   
 
 To convert reconstruction error into binary predictions, we used the precision-recall curve to find the optimal threshold that maximizes the F1-score: 0.9549.
 
 ![Figure 9: Precision Recall, F1 vs threshold plot](8.png){fig-align="center" width=600px}
+=======
+```{python}
+# Predict reconstructions
+X_test_pred = model.predict(X_test)
+test_mae = np.mean(np.abs(X_test_pred - X_test), axis=(1,2))  # Mean absolute error per sequence
+
+plt.figure(figsize=(10,4))
+plt.hist(test_mae, bins=100, alpha=0.6)
+plt.title("Distribution of Reconstruction Error (Test Set)")
+plt.xlabel("MAE")
+plt.ylabel("Count")
+plt.show()
+```
+<<<<<<< HEAD
+
+=======
+>>>>>>> a2b7f38 (kii)
+
+To convert reconstruction error into binary predictions, we used the precision-recall curve to find the optimal threshold that maximizes the F1-score: 0.9549.
+
+```{python}
+precision, recall, thresholds = precision_recall_curve(y_test, test_mae)
+f1 = 2 * (precision * recall) / (precision + recall + 1e-10)
+best_threshold = thresholds[np.argmax(f1)]
+print(f"Best threshold by max F1: {best_threshold:.4f}")
+<<<<<<< HEAD
+```
+
+```{python}
+=======
+>>>>>>> a2b7f38 (kii)
+plt.plot(thresholds, precision[:-1], label='Precision')
+plt.plot(thresholds, recall[:-1], label='Recall')
+plt.plot(thresholds, f1[:-1], label='F1')
+plt.axvline(best_threshold, color='r', linestyle='--', label='Best threshold')
+plt.xlabel('Threshold')
+plt.legend()
+plt.title("Precision/Recall/F1 vs Threshold")
+plt.show()
+<<<<<<< HEAD
+```
+
+#### 2.4 Classification Metrics
+Once the best threshold was determined, we applied it to the test set. The model successfully identified anomalous sequences with high accuracy of 99%. The confusion matrix below shows that most benign and malicious events are correctly classified. 
+
+=======
+
+```
+
+>>>>>>> 69916fe3069a2d44f625f2ea3fad77bd53af6a70
 
 #### 2.4 Classification Metrics
 Once the best threshold was determined, we applied it to the test set. The model successfully identified anomalous sequences with high accuracy of 99%. The confusion matrix below shows that most benign and malicious events are correctly classified.  
+>>>>>>> a2b7f38 (kii)
+```{python}
+# Predict anomalies
+y_pred = (test_mae > best_threshold).astype(int)
 
+# Confusion matrix
+cm = confusion_matrix(y_test, y_pred)
+<<<<<<< HEAD
+=======
+print("Confusion Matrix:\n", cm)
+
+>>>>>>> a2b7f38 (kii)
+# Metrics
+acc = accuracy_score(y_test, y_pred)
+prec = precision_score(y_test, y_pred)
+rec = recall_score(y_test, y_pred)
+f1s = f1_score(y_test, y_pred)
+fpr = cm[0,1] / (cm[0,0] + cm[0,1])
+fnr = cm[1,0] / (cm[1,0] + cm[1,1])
+roc_auc = roc_auc_score(y_test, test_mae)
+<<<<<<< HEAD
+print(f"Accuracy: {acc:.3f}")
+print(f"Precision: {prec:.3f}")
+print(f"Recall: {rec:.3f}")
+print(f"F1-score: {f1s:.3f}")
+print(f"False Positive Rate: {fpr:.3f}")
+print(f"False Negative Rate: {fnr:.3f}")
+print(f"ROC AUC: {roc_auc:.3f}")
+```
+
+
+=======
+```
+
+>>>>>>> a2b7f38 (kii)
+```{python}
+plt.figure(figsize=(5,4))
+sns.heatmap(cm, annot=True, fmt='d', cmap='Reds',
+            xticklabels=['Benign (Pred)', 'Malicious (Pred)'],
+            yticklabels=['Benign (True)', 'Malicious (True)'])
+plt.xlabel('Predicted Label')
+plt.ylabel('True Label')
+plt.title('Confusion Matrix')
+plt.show()
+```
+
+<<<<<<< HEAD
 ![Figure 10: Confusion matrix for final predictions](9.png){fig-align="center" width=600px}
+=======
+>>>>>>> 69916fe3069a2d44f625f2ea3fad77bd53af6a70
 
 - False Positive Rate: 0.040
 - False Negative Rate: 0.005
@@ -527,7 +948,21 @@ The confusion matrix highlights the model’s strength in correctly identifying 
 
 The high recall suggests the model captures almost all malicious behavior, which is critical for a cybersecurity context. The small false positive rate (3.4%) indicates that few benign sequences are misclassified, making this model practical for real-time deployment where false alarms are costly. The ROC curve and AUC value confirm the model's excellent discriminatory power between normal and malicious activity.
 
+<<<<<<< HEAD
 ![Figure 11: ROC Cuve](10.png){fig-align="center" width=600px}  
+=======
+```{python}
+# ROC Curve
+fpr_curve, tpr_curve, _ = roc_curve(y_test, test_mae)
+plt.plot(fpr_curve, tpr_curve, label=f'ROC AUC={roc_auc:.2f}')
+plt.xlabel("FPR")
+plt.ylabel("TPR")
+plt.title("ROC Curve")
+plt.legend()
+plt.show()
+```
+ 
+>>>>>>> 69916fe3069a2d44f625f2ea3fad77bd53af6a70
 
 #### 2.5 Overall Evaluation and Future Considerations
 The LSTM autoencoder exhibited strong performance in terms of: Learning a stable representation of normal sequences. Flagging novel and anomalous patterns through unsupervised learning. Achieving a high F1-score despite class imbalance.
