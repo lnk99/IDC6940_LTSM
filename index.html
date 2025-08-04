@@ -3439,7 +3439,7 @@ L = \frac{1}{T} \sum_{t=1}^T \| x_t - \hat{x}_t \|^2
 </section>
 <section id="data-preprocessing-and-sequence-modeling" class="level3">
 <h3 class="anchored" data-anchor-id="data-preprocessing-and-sequence-modeling">5. Data Preprocessing and Sequence Modeling</h3>
-<div id="edff1efe" class="cell" data-execution_count="1">
+<div id="ac6ee26b" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">## Setup and Data Loading</span></span>
@@ -3536,7 +3536,7 @@ test_dataset.csv already exists - loading from disk</code></pre>
 <p>To better understand the structure and composition of the BETH dataset, we begin by analyzing the process logs that serve as input to our LSTM-based anomaly detection model. The dataset comprises a total of 8,004,918 system events, among which a benchmark subset of approximately 763,145 records is reserved for training. The dataset is rich in temporal and categorical information, including process and thread identifiers, process names, system call arguments, return values, and two binary labels: sus (suspicious) and evil (malicious). The logs are chronologically ordered and contain a temporal feature (timestamp) suitable for sequential modeling. Each record represents an individual system event collected from one of 23 cloud-based honeypots. The data was split into training, validation, and test sets using a 60/20/20 ratio, where only the test set contains attack sequences. A descriptive analysis of the features reveals the heterogeneous nature of the dataset. The eventName field, for example, exhibits a long-tailed distribution, with certain events (e.g., execve, read, openat) appearing frequently, while others are rare and potentially indicative of anomalous behavior. The processName and hostName attributes also show high cardinality, which suggests the need for careful encoding strategies when preparing the data for modeling. An initial examination of the BETH training and test subsets reveals several insights into the nature of system-level activity across cloud-hosted honeypots. These observations have guided the formulation of our LSTM-based anomaly detection model.</p>
 <section id="event-frequency-distribution." class="level4">
 <h4 class="anchored" data-anchor-id="event-frequency-distribution.">1.1 Event Frequency Distribution.</h4>
-<div id="8b6b518d" class="cell" data-execution_count="2">
+<div id="92db26cb" class="cell" data-execution_count="2">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># ---- FIGURE 1: Most common event names in training data ----</span></span>
@@ -3561,7 +3561,7 @@ test_dataset.csv already exists - loading from disk</code></pre>
 </section>
 <section id="process-behavior" class="level4">
 <h4 class="anchored" data-anchor-id="process-behavior">1.2 Process Behavior</h4>
-<div id="11305b98" class="cell" data-execution_count="3">
+<div id="b31a8e8f" class="cell" data-execution_count="3">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># ---- FIGURE 2: Most common process names in training data ----</span></span>
@@ -3586,7 +3586,7 @@ test_dataset.csv already exists - loading from disk</code></pre>
 </section>
 <section id="temporal-skew-in-data-collection" class="level4">
 <h4 class="anchored" data-anchor-id="temporal-skew-in-data-collection">1.3 Temporal Skew in Data Collection</h4>
-<div id="b823d41f" class="cell" data-execution_count="4">
+<div id="545935b7" class="cell" data-execution_count="4">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># ---- FIGURE 2: Event frequency by hour ----</span></span>
@@ -3611,7 +3611,7 @@ test_dataset.csv already exists - loading from disk</code></pre>
 </section>
 <section id="label-imbalance-and-anomaly-prevalence" class="level4">
 <h4 class="anchored" data-anchor-id="label-imbalance-and-anomaly-prevalence">1.4 Label Imbalance and Anomaly Prevalence</h4>
-<div id="90dd3851" class="cell" data-execution_count="5">
+<div id="9687caa2" class="cell" data-execution_count="5">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># ---- FIGURE 3: Count of evil vs. benign events in test set ----</span></span>
@@ -3636,7 +3636,7 @@ test_dataset.csv already exists - loading from disk</code></pre>
 </section>
 <section id="correlation" class="level4">
 <h4 class="anchored" data-anchor-id="correlation">1.4 Correlation</h4>
-<div id="4883becb" class="cell" data-execution_count="6">
+<div id="251bee9c" class="cell" data-execution_count="6">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> dataset_to_corr_heatmap(dataframe, title, ax):</span>
@@ -3645,7 +3645,7 @@ test_dataset.csv already exists - loading from disk</code></pre>
 <span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    ax.set_title(<span class="ss">f&#39;Correlation Plot for </span><span class="sc">{</span>title<span class="sc">}</span><span class="ss">&#39;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
-<div id="52c002eb" class="cell" data-execution_count="7">
+<div id="d12d5689" class="cell" data-execution_count="7">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>fig, (ax1, ax2, ax3) <span class="op">=</span> plt.subplots(<span class="dv">3</span>, <span class="dv">1</span>, figsize <span class="op">=</span> (<span class="dv">15</span>,<span class="dv">20</span>))</span>
@@ -3669,7 +3669,7 @@ test_dataset.csv already exists - loading from disk</code></pre>
 </section>
 <section id="boxplot" class="level4">
 <h4 class="anchored" data-anchor-id="boxplot">1.4 Boxplot</h4>
-<div id="882adaa6" class="cell" data-execution_count="8">
+<div id="1ede8f50" class="cell" data-execution_count="8">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> scipy <span class="im">import</span> stats</span>
@@ -3702,7 +3702,7 @@ test_dataset.csv already exists - loading from disk</code></pre>
 </div>
 </div>
 </div>
-<div id="205de272" class="cell" data-execution_count="9">
+<div id="34c6f879" class="cell" data-execution_count="9">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> scipy <span class="im">import</span> stats</span>
@@ -3748,7 +3748,7 @@ test_dataset.csv already exists - loading from disk</code></pre>
 <section id="model-architecture" class="level5">
 <h5 class="anchored" data-anchor-id="model-architecture">2.1 Model Architecture</h5>
 <p>The architecture of our anomaly detection system is based on an LSTM autoencoder trained exclusively on benign process sequences. The input to the model is a sliding window of look_back=8 consecutive events, each described by 9 features. The encoder consists of two LSTM layers with 128 and 64 hidden units, respectively, followed by dropout layers to prevent overfitting. The latent representation is repeated and passed to a symmetric decoder consisting of two LSTM layers that reconstruct the input sequence. The model is trained to minimize the Mean Absolute Error (MAE) between the original and reconstructed sequences.</p>
-<div id="73ee0372" class="cell" data-execution_count="10">
+<div id="6ab986be" class="cell" data-execution_count="10">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.preprocessing <span class="im">import</span> LabelEncoder, StandardScaler</span>
@@ -3779,7 +3779,7 @@ test_dataset.csv already exists - loading from disk</code></pre>
 <span id="cb11-26"><a href="#cb11-26" aria-hidden="true" tabindex="-1"></a>test_df[features] <span class="op">=</span> scaler.transform(test_df[features])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
-<div id="30687734" class="cell" data-execution_count="11">
+<div id="cf3044f3" class="cell" data-execution_count="11">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> create_sequences(df, features, look_back<span class="op">=</span><span class="dv">8</span>):</span>
@@ -3810,7 +3810,7 @@ X_test shape: (188960, 8, 9)
 y_test distribution: [ 30528 158432]</code></pre>
 </div>
 </div>
-<div id="3bf144c7" class="cell" data-execution_count="12">
+<div id="94c9b262" class="cell" data-execution_count="12">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> tensorflow.keras <span class="im">import</span> layers, Model</span>
