@@ -524,7 +524,7 @@ ROC AUC = 99.5%.
 **Figure 9:** ROC Curve
 
 ![Figure 11: ROC Cuve](10.png){fig-align="center" width=600px} 
-
+---
 ## Conclusion {.smaller}
 
 *Key Results*  
@@ -542,7 +542,6 @@ ROC AUC = 99.5%.
  - Fits real-time monitoring in dynamic/cloud environments.
  
  * Future work: add attention, ensemble methods, and retraining to improve adaptability.
-
 ---
 
 ## References

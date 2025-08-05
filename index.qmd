@@ -21,7 +21,7 @@ editor_options:
   chunk_output_type: inline
 ---
 
-Slides: [Slides.html](slides.html){target="_blank"} ( Go to `slides.qmd`
+Slides: [Slides.html](Slides.html){target="_blank"} ( Go to `Slides.qmd`
 to edit)
 
 ## I- Introduction
