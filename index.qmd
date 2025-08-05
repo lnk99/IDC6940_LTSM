@@ -21,7 +21,7 @@ editor_options:
   chunk_output_type: inline
 ---
 
-Slides: [slides.html](slides.html){target="_blank"} ( Go to `slides.qmd`
+Slides: [Slides.html](slides.html){target="_blank"} ( Go to `slides.qmd`
 to edit)
 
 ## I- Introduction
@@ -195,10 +195,10 @@ To prepare the BETH dataset for LSTM modeling, we applied the following preproce
 - **Encoding:** Categorical fields were one-hot encoded to retain discrete information. Numerical fields were normalized to the [0, 1] range using min-max scaling.
 - **Sequence generation:** A sliding window of fixed size (e.g., 25–50 events) was used to convert raw logs into overlapping sequences. Each sequence was reshaped into a 3D tensor of shape (Batch × Time × Features), preserving temporal order and structural coherence.
 
-**Labeling for sequences was handled as follows:**
-- Sequences with only benign events were labeled as normal.
-- Sequences containing at least one Sus or Evil event were labeled as anomalous.
-
+**Labeling for sequences was handled as follows:**  
+- Sequences with only benign events were labeled as normal.  
+- Sequences containing at least one Sus or Evil event were labeled as anomalous.  
+  
 This approach mirrors real-world monitoring scenarios, where logs are processed in fixed-length windows to detect behavioral anomalies over time.
 
 ### 6. Model Training, Thresholding, and Evaluation
@@ -358,7 +358,25 @@ plt.ylabel("entropy values")
 plt.xticks([1,2,3],labels=['train', 'test', 'validate'])
 plt.show()
 ```
+*Train set:*
 
+- Median entropy is around ~1.5, higher than both test and validation sets.
+- Wider interquartile range (IQR), indicating more variability in entropy within the training data.
+- Several high outliers (entropy > 6), suggesting some sequences in the training data are significantly more       "disordered" or unpredictable than the rest.
+
+*Test set:*
+- Median entropy is low (~1), with a narrow IQR.
+- Distribution is more compact, meaning less variability in entropy.
+- Only a few outlines, but one very high outlier (> 8).
+
+*Validation set*:
+- Median is slightly higher than the test set (~1.2–1.3), but still lower than the training set.
+- Slightly wider spread than the test set.
+- Some high outliers (~5–6).
+
+**Interpretation**:
+
+The training set has more diverse patterns of entropy, which may indicate it includes a wider range of sequence complexities compared to test and validation sets. This could reflect richer patterns in training data or possible inconsistencies in data collection.
 
 ```{python}
 from scipy import stats
@@ -382,9 +400,26 @@ plt.title('Boxplot of Variation Values')
 plt.ylabel("Variation values")
 plt.xticks([1,2,3],labels=['train', 'test', 'validate'])
 plt.show()
-
 ```
+*Train set:*
+- Median variation is near zero, suggesting most sequences have low variability.
+- Very small IQR — most values are tightly clustered.
+- Multiple extreme outliers, including very high values (>200).
 
+*Test set*:
+- Higher median variation compared to the train set.
+- Slightly larger IQR than training set.
+- Several extreme outliers, though not as large as the biggest training outlier.
+
+*Validation set*:
+- Similar to training set in median (near zero) and small spread.
+- Fewer extreme outliers than train and test sets.
+
+**Interpretation**:
+Variation is generally low across all datasets, meaning that within most sequences, values are relatively stable. The high outliers represent occasional bursts of high variability, which might correspond to anomalous or attack-related sequences.
+
+Overall in the boxplots, the training set appears more heterogeneous in both entropy and variation, suggesting it captures a broader range of system behaviors. Plus Test and validation sets are more compact but still contain significant outliers, which may correspond to rare but important events for anomaly detection.
+The extreme outliers in both metrics could be strong indicators of anomalies or unusual system states, potentially useful for your LSTM model to learn separation between normal and abnormal patterns.
 
 #### 1.5 Implications for Modeling  
 
@@ -501,7 +536,7 @@ The final input tensor shape is (batch_size, 8, 9), corresponding to 8 time step
 We first evaluate the generalization capability of the model using a 5-fold time-series cross-validation performed on benign data only. For each fold, the model is trained on a different temporal split and evaluated on future sequences to simulate realistic detection scenarios.  
 
 :::{.center}
-![Figure 7: Training / validation Loss result](6.png){width=800px}
+![Figure 7: Training / validation Loss result](6.png){width=600px}
 :::
 
 The average validation loss across folds was: 0.142291 (+/-0.128335). After cross-validation, the model was retrained on the full benign training set. The final training and validation losses indicate stable convergence without overfitting as we can see on the figure above
@@ -514,12 +549,12 @@ The trained model was then used to compute reconstruction errors over the test s
 
 To convert reconstruction error into binary predictions, we used the precision-recall curve to find the optimal threshold that maximizes the F1-score: 0.9549.
 
-![Figure 9: Precision Recall, F1 vs threshold plot](8.png){fig-align="center" width=600px}
+![Figure 9: Precision Recall, F1 vs threshold plot](8.png){fig-align="center" width=500px}
 
 #### 2.4 Classification Metrics
 Once the best threshold was determined, we applied it to the test set. The model successfully identified anomalous sequences with high accuracy of 99%. The confusion matrix below shows that most benign and malicious events are correctly classified.  
 
-![Figure 10: Confusion matrix for final predictions](9.png){fig-align="center" width=600px}
+![Figure 10: Confusion matrix for final predictions](9.png){fig-align="center" width=500px}
 
 - False Positive Rate: 0.040
 - False Negative Rate: 0.005
@@ -528,7 +563,7 @@ The confusion matrix highlights the model’s strength in correctly identifying 
 
 The high recall suggests the model captures almost all malicious behavior, which is critical for a cybersecurity context. The small false positive rate (3.4%) indicates that few benign sequences are misclassified, making this model practical for real-time deployment where false alarms are costly. The ROC curve and AUC value confirm the model's excellent discriminatory power between normal and malicious activity.
 
-![Figure 11: ROC Cuve](10.png){fig-align="center" width=600px}  
+![Figure 11: ROC Cuve](10.png){fig-align="center" width=500px}  
 
 #### 2.5 Overall Evaluation and Future Considerations
 The LSTM autoencoder exhibited strong performance in terms of: Learning a stable representation of normal sequences. Flagging novel and anomalous patterns through unsupervised learning. Achieving a high F1-score despite class imbalance.
@@ -536,10 +571,10 @@ Aligning with state-of-the-art performance in similar studies [@highnam2021beth;
 For future deployment, periodic retraining is recommended to adapt to system evolution. Additionally, incorporating attention mechanisms or hybrid ensembles may further enhance sensitivity to subtle anomalies.
 
 ## IV-Conclusion
-This project has demonstrated the substantial potential of LSTM autoencoders for detecting anomalous cybersecurity events in real-world, process-level system logs. By leveraging the BETH dataset—one of the most realistic and contemporary benchmarks for intrusion detection—we were able to rigorously assess the effectiveness of deep sequence modeling for practical cyber defense.
+This project has demonstrated the substantial potential of LSTM autoencoders for detecting anomalous cybersecurity events in real world, process level system logs. By leveraging the BETH dataset one of the most realistic and contemporary benchmarks for intrusion detection, we were able to rigorously assess the effectiveness of deep sequence modeling for practical cyber defense.
 Our approach, grounded in unsupervised learning, involved training the LSTM autoencoder exclusively on benign sequences to learn the complex temporal dependencies that characterize normal system behavior. The model’s ability to generalize from limited windows of typical activity allowed it to sensitively identify even subtle deviations linked to novel or sophisticated attacks. Through careful feature engineering, one-hot encoding, and sequence modeling, we prepared heterogeneous system logs for robust anomaly detection.
 
-The evaluation of our model was comprehensive and multidimensional. Using metrics such as precision, recall, F1-score, ROC-AUC, and confusion matrices, we showed that the LSTM autoencoder achieved high accuracy (99%) and a strong ability to discriminate between benign and malicious activity—even in the face of class imbalance and temporal data skew. The model’s low false positive and false negative rates affirm its practicality for real-time deployment, where both missed attacks and false alarms carry significant costs.
+The evaluation of our model was comprehensive and multidimensional. Using metrics such as precision, recall, F1-score, ROC-AUC, and confusion matrices, we showed that the LSTM autoencoder achieved high accuracy (99%) and a strong ability to discriminate between benign and malicious activity, even in the face of class imbalance and temporal data skew. The model’s low false positive and false negative rates affirm its practicality for real-time deployment, where both missed attacks and false alarms carry significant costs.
 
 A key strength of this work lies in its adaptability. Because the method is unsupervised and does not rely on prior knowledge of attack signatures, it remains robust against previously unseen or zero-day threats. This property, combined with rigorous threshold tuning and cross-validation, positions the approach as a promising candidate for deployment in dynamic, evolving cybersecurity environments.
 
