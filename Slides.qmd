@@ -500,7 +500,6 @@ model.summary()
 
 Distribution of reconstruction error separates normal vs. anomalous.
 
-**Figure 6:** Reconstruction Error Distribution
 
 ![Figure 8: Histogram of test reconstruction errors (MAE)](7.png){fig-align="center" width=800px}   
 
@@ -508,7 +507,6 @@ Distribution of reconstruction error separates normal vs. anomalous.
 
 Precision: 99.3%, Recall: 99.5%, F1-score: 99.4%.
 
-**Figure 7:** Precision/Recall Curve
 
 ![Figure 9: Precision Recall, F1 vs threshold plot](8.png){fig-align="center" width=600px}
 
@@ -521,7 +519,6 @@ Precision: 99.3%, Recall: 99.5%, F1-score: 99.4%.
 
 ROC AUC = 99.5%.
 
-**Figure 9:** ROC Curve
 
 ![Figure 11: ROC Cuve](10.png){fig-align="center" width=600px} 
 ---
