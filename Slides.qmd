@@ -1,5 +1,5 @@
 ---
-title: "Detecting Anomalous Cybersecurity Events Using LSTM Networks"
+title: "Detecting Anomalous Cybersecurity Events Using LSTM Autoencoders"
 subtitle: "A Case Study on the BETH Dataset"
 author: "Lionel & Killian (Advisor: Dr. Cohen)"
 date: today
